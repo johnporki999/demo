@@ -33,9 +33,10 @@
   .resource .ico { font-size:14px; }
   .resource .val { font-family:'Cinzel'; font-weight:700; color:var(--gold-light); font-size:13px; text-shadow:0 1px 3px #000; }
   .resource .sub { font-size:8px; color:#cdbb92; }
-  #title-crest { margin-left:auto; text-align:right; background:rgba(13,9,5,0.45); backdrop-filter:blur(6px); border:1px solid rgba(200,146,42,0.5); border-radius:8px; padding:3px 8px; }
+  #title-crest { margin-left:auto; text-align:right; background:rgba(13,9,5,0.45); backdrop-filter:blur(6px); border:1px solid rgba(200,146,42,0.5); border-radius:8px; padding:3px 8px; min-width:78px; }
   #title-crest .crest { font-size:18px; }
   #title-crest .name { font-family:'Cinzel'; font-weight:900; font-size:10px; color:var(--gold); letter-spacing:1px; }
+  #season-ind { display:block; font-variant-numeric:tabular-nums; white-space:nowrap; min-width:72px; text-align:right; }
   #canvas-wrap-old { display:none; }
   .float-text { position:absolute; font-family:'Cinzel'; font-weight:700; font-size:14px; text-shadow:0 1px 3px #000,0 0 8px #c9a22788; pointer-events:none; z-index:30; animation:floatup 1.2s ease-out forwards; }
   @keyframes floatup { 0%{transform:translateY(0) scale(0.8);opacity:0;} 20%{opacity:1;transform:translateY(-5px) scale(1.1);} 100%{transform:translateY(-45px) scale(1);opacity:0;} }
@@ -208,6 +209,28 @@
   .place-btn.confirm { background:linear-gradient(160deg,#6a8a3a,#4a6b24); color:#fff; box-shadow:0 2px 10px rgba(90,120,40,0.5); }
   .place-btn.cancel { background:linear-gradient(160deg,#8B1A1A,#6a1212); color:#fff; box-shadow:0 2px 10px rgba(139,26,26,0.5); }
   .place-btn:active { transform:scale(0.9); }
+
+  /* ===== TELEFON: kompaktowy topbar ===== */
+  @media (max-width:430px){
+    #topbar { gap:4px; padding:calc(env(safe-area-inset-top) + 6px) 6px 6px; }
+    .resource { padding:2px 5px; border-radius:7px; }
+    .resource .ico { font-size:12px; }
+    .resource .val { font-size:11px; }
+    .resource .sub { font-size:7px; }
+    .resource-row { gap:2px; }
+    #title-crest { padding:2px 6px; min-width:66px; }
+    #title-crest .crest { font-size:15px; }
+    #title-crest .name { font-size:9px; letter-spacing:0.5px; }
+    #season-ind { font-size:8px !important; min-width:60px; }
+  }
+  @media (max-width:360px){
+    #topbar { gap:3px; padding:calc(env(safe-area-inset-top) + 5px) 4px 5px; }
+    .resource { padding:2px 4px; }
+    .resource .ico { font-size:11px; }
+    .resource .val { font-size:10px; }
+    .resource .sub { display:none; }
+    #title-crest .name#title-name { display:none; }
+  }
 </style>
 </head>
 <body>
@@ -483,6 +506,18 @@ const SEASONS=[
 ];
 function season(){ return SEASONS[Math.floor((state.month%12)/3)%4]; }
 function seasonId(){ return Math.floor((state.month%12)/3)%4; }
+function nextSeasonId(){ return (seasonId()+1)%4; }
+// 0..1 — postęp w obrębie bieżącego sezonu (każdy sezon = 3 miesiące)
+function seasonProgress(){ return ((state.month%12)/3)%1; }
+// łagodzimy końcówkę sezonu: przejście realnie widoczne dopiero w ostatniej ~1/3 sezonu
+function seasonBlend(){ const p=seasonProgress(); const t=Math.max(0,(p-0.66)/0.34); return t*t*(3-2*t); }
+// interpolacja kolorów (obsługuje rgb/rgba/hex)
+function parseCol(c){
+  if(c[0]==='#'){ let h=c.slice(1); if(h.length===3)h=h.split('').map(x=>x+x).join(''); return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16),1]; }
+  const m=c.match(/[\d.]+/g)||[0,0,0,1]; return [+m[0],+m[1],+m[2],m[3]!==undefined?+m[3]:1];
+}
+function lerpColor(a,b,t){ const A=parseCol(a),B=parseCol(b); const r=Math.round(A[0]+(B[0]-A[0])*t),g=Math.round(A[1]+(B[1]-A[1])*t),bb=Math.round(A[2]+(B[2]-A[2])*t),al=(A[3]+(B[3]-A[3])*t); return `rgba(${r},${g},${bb},${al.toFixed(3)})`; }
+function seasonTint(){ return lerpColor(SEASONS[seasonId()].tint, SEASONS[nextSeasonId()].tint, seasonBlend()); }
 function seasonFoodMult(){ let m=season().food; if(m<1 && hasTech('spichlerze'))m=1; return m; }
 function seasonIncomeMult(){ return season().income; }
 // płatki śniegu (stałe pozycje, animowane spadanie)
@@ -685,18 +720,23 @@ function getTerrain(gx,gy){
 // =====================================================================
 //  DRAW
 // =====================================================================
-function biomeColor(t){
-  const s=seasonId();
-  if(t.type==='water'){ if(s===3)return t.v>0.5?'#5a7a96':'#4a6a86'; return t.v>0.5?'#3f7396':'#356585'; } // zimą jaśniejsza, lód
+function biomeColorFor(t,s){
+  if(t.type==='water'){ if(s===3)return t.v>0.5?'#5a7a96':'#4a6a86'; return t.v>0.5?'#3f7396':'#356585'; }
   if(t.type==='mountain') return t.v>0.5?'#9a9388':'#7e7870';
   if(t.type==='sand') return '#cbb778';
-  if(t.type==='forest'){ if(s===2)return '#6a5520'; if(s===3)return '#5a6648'; return '#3a6b32'; } // jesień brąz, zima szarozielony
-  // trawa
-  if(s===0) return t.v>0.5?'#74b04a':'#64a040'; // wiosna soczysta
-  if(s===1) return t.v>0.5?'#6ba83a':'#5e9838'; // lato
-  if(s===2) return t.v>0.5?'#9a8838':'#8a7830'; // jesień żółknie
-  if(s===3) return t.v>0.5?'#8a9478':'#7a8468'; // zima wyblakła
+  if(t.type==='forest'){ if(s===2)return '#6a5520'; if(s===3)return '#5a6648'; return '#3a6b32'; }
+  if(s===0) return t.v>0.5?'#74b04a':'#64a040';
+  if(s===1) return t.v>0.5?'#6ba83a':'#5e9838';
+  if(s===2) return t.v>0.5?'#9a8838':'#8a7830';
+  if(s===3) return t.v>0.5?'#8a9478':'#7a8468';
   return t.v>0.5?'#6ba24a':'#5e9440';
+}
+function biomeColor(t){
+  // góry/piasek bez zmian sezonowych — pomijamy interpolację dla wydajności
+  if(t.type==='mountain'||t.type==='sand') return biomeColorFor(t,seasonId());
+  const blend=seasonBlend();
+  if(blend<0.01) return biomeColorFor(t,seasonId());
+  return lerpColor(biomeColorFor(t,seasonId()), biomeColorFor(t,nextSeasonId()), blend);
 }
 function fogLevel(gx,gy){ if(plotOwned(gx,gy))return 0; const px=Math.floor(gx/PLOT),py=Math.floor(gy/PLOT); let best=99; for(const k in state.ownedPlots){const [ox,oy]=k.split(',').map(Number);best=Math.min(best,Math.max(Math.abs(px-ox),Math.abs(py-oy)));} return best; }
 function drawTerrainTile(gx,gy){
@@ -921,13 +961,16 @@ function render(){
     ctx.globalAlpha=0.55; buildingArt(selectedBuild,x,y,s); ctx.globalAlpha=1;
     ctx.strokeStyle='#E3B450'; ctx.lineWidth=2.5*zoom; ctx.setLineDash([5*zoom,3*zoom]); ctx.strokeRect(x+1,y+1,s-2,s-2); ctx.setLineDash([]); } }
   if(hover&&(selectedBuild||axeMode)){ const {x,y}=gridToScreen(hover.gx,hover.gy); const s=TILE*zoom; let ok=axeMode?canClear(hover.gx,hover.gy):canPlace(hover.gx,hover.gy); ctx.fillStyle=ok?(axeMode?'rgba(90,107,42,0.45)':'rgba(200,146,42,0.35)'):'rgba(139,26,26,0.4)'; ctx.fillRect(x,y,s,s); ctx.strokeStyle=ok?'#E3B450':'#B33030'; ctx.lineWidth=2*zoom; ctx.strokeRect(x,y,s,s); }
-  // nakładka koloru sezonu
-  const se=season(); ctx.fillStyle=se.tint; ctx.fillRect(0,0,W,H);
-  // PADAJĄCY ŚNIEG zimą
-  if(seasonId()===3){
+  // nakładka koloru sezonu (płynne przejście)
+  ctx.fillStyle=seasonTint(); ctx.fillRect(0,0,W,H);
+  // PADAJĄCY ŚNIEG zimą (z narastaniem/zanikaniem na przejściu)
+  let snowA=0;
+  if(seasonId()===3) snowA=0.3+0.7*seasonProgress();        // zima: narasta
+  else if(seasonId()===2) snowA=seasonBlend()*0.3;          // jesień→zima: lekko zaczyna
+  if(snowA>0.02){
     if(!snowflakes) initSnow();
     const T=Date.now()/1000;
-    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.fillStyle=`rgba(255,255,255,${(0.85*snowA).toFixed(3)})`;
     for(const f of snowflakes){
       const px=(f.x*W + Math.sin(T*0.5+f.drift)*20)%W;
       const py=(f.y*H + T*f.sp*60)%H;
@@ -1017,15 +1060,15 @@ function knowPerYear(){ let kn=0; for(const k in state.map){const b=state.map[k]
 let tickCount=0;
 function tick(){
   if(pendingEvent) return; // gra wstrzymana podczas decyzji
-  state.month+=0.125; // rok = 96 ticków (~80s), sezon co 24 ticki (~20s)
+  state.month+=0.0625; // rok = 192 ticki (~160s), sezon co 48 ticków (~40s) — 2x wolniej
   const newYear = state.month>=12;
   if(newYear){ state.month-=12; state.year++; }
-  state.gold+=incomePerYear()/96; state.wood+=woodPerYear()/24; state.know+=knowPerYear()/24;
+  state.gold+=incomePerYear()/192*3; state.wood+=woodPerYear()/48; state.know+=knowPerYear()/48;
   state.gold=Math.round(state.gold*100)/100; state.wood=Math.round(state.wood); state.know=Math.round(state.know);
   if(state.gold>state.stats.peakGold)state.stats.peakGold=state.gold;
   recalc(); // sezon wpływa na żywność
   const keys=Object.keys(state.map);
-  if(keys.length && tickCount%2===0){const rk=keys[Math.floor(Math.random()*keys.length)];const [gx,gy]=rk.split(',').map(Number);if(fogLevel(gx,gy)===0){const sc=gridToScreen(gx,gy);const b=state.map[rk];floatText(sc.x+TILE*zoom/2,sc.y,`+${(buildingIncome(b.type,b.level,gx,gy)/96).toFixed(1)}🪙`);}}
+  if(keys.length && tickCount%2===0){const rk=keys[Math.floor(Math.random()*keys.length)];const [gx,gy]=rk.split(',').map(Number);if(fogLevel(gx,gy)===0){const sc=gridToScreen(gx,gy);const b=state.map[rk];floatText(sc.x+TILE*zoom/2,sc.y,`+${(buildingIncome(b.type,b.level,gx,gy)/192*3).toFixed(1)}🪙`);}}
   if(state.food<0&&Math.random()<0.3) notify('⚠ Głód! Zbuduj pola.',true);
   if(keys.length>0 && tickCount%3===0) SFX.coin();
   if(newYear){ maybeRaid(); if(!pendingEvent) maybeEvent(); }
