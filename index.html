@@ -3,14 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Gród Piastów</title>
+<title>Dziedzic: Dzieje Polski</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  :root { --parchment:#e8dcc0; --parchment-dark:#d4c4a0; --ink:#2a1f14; --gold:#c9a227; --gold-light:#e6c558; --crimson:#8b2332; --crimson-light:#b33a4a; --wood:#4a3526; --wood-dark:#2f2118; --green:#4a7c3f; --shadow:rgba(0,0,0,0.4); }
-  html,body { height:100%; overflow:hidden; background:#1a140d; font-family:'EB Garamond',serif; color:var(--ink); user-select:none; -webkit-user-select:none; touch-action:none; }
+  :root {
+    --archive:#0D0905;     /* Czerń Archiwum - tło główne */
+    --gold:#C8922A;        /* Złoto Korony - akcent dominujący */
+    --gold-light:#E3B450;  /* jaśniejsze złoto */
+    --crimson:#8B1A1A;     /* Karmazyn - daty, wyróżnienia */
+    --crimson-light:#B33030;
+    --parchment:#FAF5EC;   /* Pergamin - tło jasne */
+    --parchment-dark:#E8DEC8;
+    --brown:#4A2E0A;       /* Brąz Stary - tekst pomocniczy */
+    --ink:#2A1B08;
+    --wood:#4A2E0A; --wood-dark:#2A1B08;
+    --green:#5A6B2A;       /* stonowana zieleń pod paletę */
+    --shadow:rgba(0,0,0,0.55);
+  }
+  html,body { height:100%; overflow:hidden; background:var(--archive); font-family:'EB Garamond',serif; color:var(--ink); user-select:none; -webkit-user-select:none; touch-action:none; }
   #game { position:fixed; inset:0; display:flex; flex-direction:column; }
-  #topbar { background:linear-gradient(180deg,#3a2818,#2a1d10); border-bottom:3px solid var(--gold); box-shadow:0 2px 12px var(--shadow); padding:calc(env(safe-area-inset-top) + 6px) 10px 6px; display:flex; align-items:center; gap:6px; z-index:20; position:relative; }
+  #topbar { background:linear-gradient(180deg,#1A1109,#0D0905); border-bottom:3px solid var(--gold); box-shadow:0 2px 12px var(--shadow); padding:calc(env(safe-area-inset-top) + 6px) 10px 6px; display:flex; align-items:center; gap:6px; z-index:20; position:relative; }
   #topbar::after { content:''; position:absolute; bottom:-3px; left:0; right:0; height:3px; background:linear-gradient(90deg,transparent,var(--gold-light),transparent); }
   .resource { background:rgba(0,0,0,0.3); border:1px solid var(--gold); border-radius:6px; padding:4px 7px; display:flex; flex-direction:column; align-items:center; min-width:0; }
   .resource-row { display:flex; align-items:center; gap:3px; }
@@ -24,7 +37,7 @@
   #game-canvas { display:block; width:100%; height:100%; }
   .float-text { position:absolute; font-family:'Cinzel'; font-weight:700; font-size:14px; text-shadow:0 1px 3px #000,0 0 8px #c9a22788; pointer-events:none; z-index:30; animation:floatup 1.2s ease-out forwards; }
   @keyframes floatup { 0%{transform:translateY(0) scale(0.8);opacity:0;} 20%{opacity:1;transform:translateY(-5px) scale(1.1);} 100%{transform:translateY(-45px) scale(1);opacity:0;} }
-  #build-bar { background:linear-gradient(180deg,#3a2818,#261a0f); border-top:3px solid var(--gold); box-shadow:0 -2px 16px var(--shadow); z-index:20; position:relative; padding-bottom:env(safe-area-inset-bottom); }
+  #build-bar { background:linear-gradient(180deg,#1A1109,#0D0905); border-top:3px solid var(--gold); box-shadow:0 -2px 16px var(--shadow); z-index:20; position:relative; padding-bottom:env(safe-area-inset-bottom); }
   #build-bar::before { content:''; position:absolute; top:-3px; left:0; right:0; height:3px; background:linear-gradient(90deg,transparent,var(--gold-light),transparent); }
   #build-scroll { display:flex; gap:8px; overflow-x:auto; padding:10px; scrollbar-width:none; }
   #build-scroll::-webkit-scrollbar { display:none; }
@@ -43,12 +56,12 @@
   .tool-card .tc-ico { font-size:22px; }
   .tool-card .tc-name { font-family:'Cinzel'; font-weight:700; font-size:8px; line-height:1.1; margin-top:2px; }
   #side-controls { position:absolute; top:10px; right:8px; display:flex; flex-direction:column; gap:6px; z-index:15; }
-  .ctrl-btn { width:40px; height:40px; background:linear-gradient(160deg,#3a2818,#261a0f); border:2px solid var(--gold); border-radius:8px; color:var(--gold-light); font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 6px var(--shadow); }
+  .ctrl-btn { width:40px; height:40px; background:linear-gradient(160deg,#1A1109,#0D0905); border:2px solid var(--gold); border-radius:8px; color:var(--gold-light); font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 6px var(--shadow); }
   .ctrl-btn:active { transform:scale(0.92); }
   #notif { position:absolute; top:12px; left:50%; transform:translateX(-50%) translateY(-80px); background:linear-gradient(160deg,var(--parchment),var(--parchment-dark)); border:2px solid var(--gold); border-radius:8px; padding:8px 16px; font-family:'Cinzel'; font-weight:700; font-size:12px; color:var(--ink); box-shadow:0 4px 16px var(--shadow); z-index:40; transition:transform .3s cubic-bezier(.2,1.4,.4,1); white-space:nowrap; max-width:90vw; text-align:center; }
   #notif.show { transform:translateX(-50%) translateY(0); }
   #notif.err { border-color:var(--crimson); color:var(--crimson); }
-  #info-panel { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(180deg,#3a2818,#1f150c); border-top:3px solid var(--gold); border-radius:16px 16px 0 0; padding:14px 16px calc(env(safe-area-inset-bottom) + 14px); z-index:50; transform:translateY(110%); transition:transform .3s cubic-bezier(.2,1,.4,1); box-shadow:0 -4px 20px var(--shadow); }
+  #info-panel { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(180deg,#1A1109,#0D0905); border-top:3px solid var(--gold); border-radius:16px 16px 0 0; padding:14px 16px calc(env(safe-area-inset-bottom) + 14px); z-index:50; transform:translateY(150%); transition:transform .3s cubic-bezier(.2,1,.4,1); box-shadow:0 -4px 20px var(--shadow); will-change:transform; }
   #info-panel.show { transform:translateY(0); }
   #info-panel .ip-head { display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--gold); padding-bottom:8px; margin-bottom:8px; }
   #info-panel .ip-icon { width:40px; height:40px; }
@@ -63,9 +76,12 @@
   .ip-upgrade { background:linear-gradient(160deg,#3a5a2a,#243a18); border-color:var(--green); color:#d4f0c0; }
   .ip-demolish { background:linear-gradient(160deg,#5a2530,#3a1820); border-color:var(--crimson-light); color:var(--parchment); }
   .ip-close { position:absolute; top:10px; right:14px; color:var(--gold); font-size:22px; cursor:pointer; line-height:1; }
-  #intro { position:absolute; inset:0; z-index:100; background:radial-gradient(circle at 50% 40%,#3a2818,#14100a); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px; }
-  #intro .crest-big { font-size:64px; margin-bottom:10px; filter:drop-shadow(0 0 20px var(--gold)); }
-  #intro h1 { font-family:'Cinzel'; font-weight:900; font-size:32px; color:var(--gold-light); letter-spacing:3px; margin-bottom:6px; text-shadow:0 2px 12px #000; }
+  #intro { position:absolute; inset:0; z-index:100; background:radial-gradient(circle at 50% 40%,#1A1109,#0D0905); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px; }
+  #intro .brand-logo { font-family:'Cinzel Decorative',serif; font-weight:900; font-size:30px; color:var(--gold); letter-spacing:8px; text-shadow:0 0 20px rgba(200,146,42,0.5); }
+  #intro .brand-tag { font-family:'Cinzel',serif; font-size:9px; color:var(--parchment); letter-spacing:5px; margin-bottom:26px; opacity:0.7; }
+  #intro .crest-big { font-size:56px; margin-bottom:6px; filter:drop-shadow(0 0 20px var(--gold)); }
+  #intro h1 { font-family:'Cinzel Decorative',serif; font-weight:900; font-size:38px; color:var(--gold-light); letter-spacing:4px; margin-bottom:2px; text-shadow:0 2px 16px #000; }
+  #intro .h1-sub { font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--crimson-light); letter-spacing:6px; margin-bottom:18px; }
   #intro .sub { font-style:italic; font-size:15px; color:#c4b48c; margin-bottom:24px; max-width:330px; line-height:1.5; }
   #intro .start-btn { font-family:'Cinzel'; font-weight:700; font-size:16px; background:linear-gradient(160deg,var(--gold-light),var(--gold)); color:var(--wood-dark); border:none; border-radius:10px; padding:14px 40px; cursor:pointer; letter-spacing:1px; box-shadow:0 4px 16px var(--shadow),inset 0 1px 2px rgba(255,255,255,0.4); margin-bottom:10px; }
   #intro .start-btn:active { transform:scale(0.96); }
@@ -90,7 +106,7 @@
   /* USTAWIENIA */
   #settings { position:absolute; inset:0; z-index:115; background:rgba(10,7,4,0.78); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:24px; }
   #settings.show { display:flex; }
-  .set-box { background:linear-gradient(165deg,#3a2818,#241810); border:3px solid var(--gold); border-radius:14px; padding:22px 20px; max-width:340px; width:100%; box-shadow:0 8px 30px #000; position:relative; }
+  .set-box { background:linear-gradient(165deg,#1A1109,#15100A); border:3px solid var(--gold); border-radius:14px; padding:22px 20px; max-width:340px; width:100%; box-shadow:0 8px 30px #000; position:relative; }
   .set-close { position:absolute; top:12px; right:16px; color:var(--gold); font-size:22px; cursor:pointer; line-height:1; }
   .set-title { font-family:'Cinzel'; font-weight:900; font-size:19px; color:var(--gold-light); margin-bottom:18px; text-align:center; }
   .set-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px; }
@@ -112,23 +128,23 @@
   /* EKRAN POSTĘPU */
   #progress { position:absolute; inset:0; z-index:115; background:rgba(10,7,4,0.82); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:16px; }
   #progress.show { display:flex; }
-  .prog-box { background:linear-gradient(165deg,#3a2818,#221610); border:3px solid var(--gold); border-radius:14px; padding:18px 16px; max-width:380px; width:100%; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 8px 30px #000; position:relative; }
+  .prog-box { background:linear-gradient(165deg,#1A1109,#0D0905); border:3px solid var(--gold); border-radius:14px; padding:18px 16px; max-width:380px; width:100%; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 8px 30px #000; position:relative; }
   .prog-close { position:absolute; top:12px; right:16px; color:var(--gold); font-size:22px; cursor:pointer; line-height:1; z-index:2; }
   .prog-crest { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
   .prog-icon { font-size:38px; }
   .prog-title { font-family:'Cinzel'; font-weight:900; font-size:22px; color:var(--gold-light); letter-spacing:1px; }
   .prog-sub { font-size:12px; color:#b8a878; }
-  .prestige-bar { height:8px; background:#2a1d10; border-radius:6px; overflow:hidden; margin-bottom:14px; border:1px solid #5a4a30; }
+  .prestige-bar { height:8px; background:#0D0905; border-radius:6px; overflow:hidden; margin-bottom:14px; border:1px solid #5a4a30; }
   .prestige-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:6px; transition:width .4s; width:0%; }
   .prog-tabs { display:flex; gap:4px; margin-bottom:12px; }
-  .prog-tab { flex:1; text-align:center; font-family:'Cinzel'; font-weight:700; font-size:11px; color:#9a8a6a; background:#2a1d10; border:1px solid #4a3a22; border-radius:8px; padding:8px 4px; cursor:pointer; }
+  .prog-tab { flex:1; text-align:center; font-family:'Cinzel'; font-weight:700; font-size:11px; color:#9a8a6a; background:#0D0905; border:1px solid #4a3a22; border-radius:8px; padding:8px 4px; cursor:pointer; }
   .prog-tab.active { color:var(--wood-dark); background:linear-gradient(160deg,var(--gold-light),var(--gold)); border-color:var(--gold); }
   .prog-content { overflow-y:auto; flex:1; }
   .prog-content::-webkit-scrollbar { width:4px; } .prog-content::-webkit-scrollbar-thumb { background:var(--gold); border-radius:2px; }
   /* tech */
   .tech-branch { margin-bottom:14px; }
   .tech-branch-title { font-family:'Cinzel'; font-weight:700; font-size:13px; color:var(--gold-light); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
-  .tech-item { background:#241810; border:1px solid #4a3a22; border-radius:8px; padding:9px 10px; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
+  .tech-item { background:#15100A; border:1px solid #4a3a22; border-radius:8px; padding:9px 10px; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
   .tech-item.unlocked { border-color:var(--green); background:#1a2814; }
   .tech-item.available { border-color:var(--gold); }
   .tech-info { flex:1; }
@@ -137,10 +153,10 @@
   .tech-btn { font-family:'Cinzel'; font-weight:700; font-size:11px; border-radius:6px; padding:7px 10px; cursor:pointer; border:none; white-space:nowrap; }
   .tech-btn.buy { background:linear-gradient(160deg,var(--gold-light),var(--gold)); color:var(--wood-dark); }
   .tech-btn.done { background:none; color:var(--green); border:1px solid var(--green); }
-  .tech-btn.lock { background:#2a1d10; color:#7a6a4a; border:1px solid #4a3a22; }
+  .tech-btn.lock { background:#0D0905; color:#7a6a4a; border:1px solid #4a3a22; }
   /* achievements */
   .ach-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .ach-item { background:#241810; border:1px solid #4a3a22; border-radius:8px; padding:10px 8px; text-align:center; opacity:0.5; }
+  .ach-item { background:#15100A; border:1px solid #4a3a22; border-radius:8px; padding:10px 8px; text-align:center; opacity:0.5; }
   .ach-item.got { opacity:1; border-color:var(--gold); background:#2a2010; }
   .ach-ico { font-size:26px; margin-bottom:4px; filter:grayscale(1); }
   .ach-item.got .ach-ico { filter:none; }
@@ -151,8 +167,8 @@
   .stat-line .sl-label { color:#b8a878; } .stat-line .sl-val { color:var(--gold-light); font-family:'Cinzel'; font-weight:700; }
 
   /* TOAST OSIĄGNIĘCIA */
-  #ach-toast { position:absolute; top:70px; left:50%; transform:translateX(-50%) translateY(-120px); background:linear-gradient(160deg,#4a3a1a,#2a1d0a); border:2px solid var(--gold-light); border-radius:10px; padding:10px 18px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 20px #000,0 0 20px #c9a22766; z-index:120; transition:transform .4s cubic-bezier(.2,1.4,.4,1); }
-  #ach-toast.show { transform:translateX(-50%) translateY(0); }
+  #ach-toast { position:absolute; top:70px; left:50%; transform:translateX(-50%) translateY(-30px); background:linear-gradient(160deg,#2A1B08,#0D0905); border:2px solid var(--gold-light); border-radius:10px; padding:10px 18px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 20px #000,0 0 20px #c9a22766; z-index:120; transition:transform .4s cubic-bezier(.2,1.4,.4,1), opacity .3s ease; opacity:0; visibility:hidden; pointer-events:none; }
+  #ach-toast.show { transform:translateX(-50%) translateY(0); opacity:1; visibility:visible; }
   .at-icon { font-size:32px; }
   .at-label { font-family:'Cinzel'; font-size:10px; color:var(--gold); letter-spacing:1px; }
   .at-name { font-family:'Cinzel'; font-weight:900; font-size:14px; color:var(--gold-light); }
@@ -166,8 +182,20 @@
   .ev-title { font-family:'Cinzel'; font-weight:900; font-size:22px; color:var(--crimson); margin-bottom:12px; }
   .ev-text { font-size:15px; line-height:1.55; color:var(--ink); margin-bottom:18px; }
   .ev-options { display:flex; flex-direction:column; gap:8px; }
-  .ev-opt { background:linear-gradient(160deg,#4a3a20,#2f2410); border:2px solid var(--gold); color:var(--gold-light); border-radius:8px; padding:12px; font-family:'Cinzel'; font-weight:700; font-size:14px; cursor:pointer; }
+  .ev-opt { background:linear-gradient(160deg,#2A1B08,#1A1109); border:2px solid var(--gold); color:var(--gold-light); border-radius:8px; padding:12px; font-family:'Cinzel'; font-weight:700; font-size:14px; cursor:pointer; }
   .ev-opt:active { transform:scale(0.97); }
+
+  /* POTWIERDZENIE RESETU */
+  #confirm { position:absolute; inset:0; z-index:130; background:rgba(13,9,5,0.88); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:24px; }
+  #confirm.show { display:flex; }
+  .cf-box { background:linear-gradient(165deg,var(--parchment),var(--parchment-dark)); border:3px solid var(--crimson); border-radius:14px; padding:24px 22px; max-width:340px; width:100%; text-align:center; box-shadow:0 8px 40px #000; }
+  .cf-icon { font-size:46px; margin-bottom:8px; }
+  .cf-title { font-family:'Cinzel',serif; font-weight:900; font-size:20px; color:var(--crimson); margin-bottom:10px; }
+  .cf-text { font-size:14px; line-height:1.5; color:var(--ink); margin-bottom:18px; }
+  .cf-btns { display:flex; gap:10px; }
+  .cf-cancel { flex:1; background:none; border:2px solid var(--brown); color:var(--brown); border-radius:8px; padding:12px; font-family:'Cinzel',serif; font-weight:700; font-size:13px; cursor:pointer; }
+  .cf-confirm { flex:1; background:linear-gradient(160deg,var(--crimson-light),var(--crimson)); border:none; color:var(--parchment); border-radius:8px; padding:12px; font-family:'Cinzel',serif; font-weight:700; font-size:13px; cursor:pointer; }
+  .cf-cancel:active,.cf-confirm:active { transform:scale(0.96); }
 </style>
 </head>
 <body>
@@ -200,11 +228,12 @@
   </div>
   <div id="build-bar"><div id="build-scroll"></div></div>
   <div id="intro">
-    <div class="crest-big">🦅</div><h1>GRÓD PIASTÓW</h1>
+    <div class="crest-big">🦅</div>
+    <h1>DZIEDZIC</h1>
+    <div class="h1-sub">DZIEJE POLSKI</div>
     <div class="sub" id="intro-sub">Roku Pańskiego 966. Z małej osady zbuduj potęgę. Karczuj lasy, wykupuj ziemie i odkrywaj nieznane krainy — pola, puszcze, rzeki, góry i morze.</div>
     <button class="start-btn" id="start-btn" onclick="startGame()">⚔ ZAŁÓŻ OSADĘ</button>
     <button class="reset-btn" id="reset-btn" onclick="resetGame()" style="display:none">🗑 Zacznij od nowa</button>
-    <div class="channel">— scenariusz dla kanału „Dzieje TV" —</div>
   </div>
 
   <!-- SAMOUCZEK -->
@@ -253,7 +282,6 @@
       <div class="set-divider"></div>
       <button class="set-action" onclick="closeSettings();showTutorial(true)">📖 Pokaż samouczek</button>
       <button class="set-action danger" onclick="resetFromSettings()">🗑 Zacznij grę od nowa</button>
-      <div class="set-hint">Muzyka: wrzuć pliki <b>1.mp3, 2.mp3...</b> obok pliku gry — gra losuje je sama.</div>
     </div>
   </div>
 
@@ -269,6 +297,19 @@
         <div class="prog-tab" data-tab="stat" onclick="switchTab('stat')">📊 Kronika</div>
       </div>
       <div class="prog-content" id="prog-content"></div>
+    </div>
+  </div>
+
+  <!-- POTWIERDZENIE RESETU -->
+  <div id="confirm">
+    <div class="cf-box">
+      <div class="cf-icon">⚠️</div>
+      <div class="cf-title">Zacząć od nowa?</div>
+      <div class="cf-text">Cały dotychczasowy postęp — budynki, ziemie, technologie i osiągnięcia — zostanie bezpowrotnie utracony.</div>
+      <div class="cf-btns">
+        <button class="cf-cancel" onclick="cancelReset()">Anuluj</button>
+        <button class="cf-confirm" onclick="doReset()">Tak, zacznij od nowa</button>
+      </div>
     </div>
   </div>
 
@@ -290,7 +331,7 @@
 // =====================================================================
 //  GRÓD PIASTÓW v4 — localStorage + fix kliknięcia + fix zoomu
 // =====================================================================
-const TILE=70, PLOT=5, TICK_MS=4000, SAVE_KEY='grod_piastow_save_v5';
+const TILE=70, PLOT=5, TICK_MS=5000, SAVE_KEY='dziedzic_save_v1';
 
 const BUILDINGS = {
   pole:     { name:'Pole Uprawne', cost:40,   wood:5,   income:3,  pop:0,  food:6,  unlock:0,    desc:'Żyzna ziemia daje chleb i grosz.' },
@@ -306,7 +347,7 @@ const BUILDINGS = {
   zamek:    { name:'Zamek',        cost:4000, wood:200, income:120,pop:12, food:-6, unlock:5000, desc:'Kamienny zamek. Potęga rodu.' },
 };
 const UPGRADE_MULT=1.6;
-const STAR_TIERS=['#a06a3a','#c0c0c8','#e6c558','#5ad0e0','#c060e0','#ff5a5a'];
+const STAR_TIERS=['#a06a3a','#c0a878','#C8922A','#E3B450','#B33030','#8B1A1A'];
 
 // ---- TECHNOLOGIE (4 gałęzie) ----
 const TECH = {
@@ -571,12 +612,18 @@ function loadGame(){
 }
 let saveTimer=null;
 function autoSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveGame(false),600); }
-function resetGame(){
+let resetReturnToSettings=false;
+function resetGame(){ resetReturnToSettings=false; document.getElementById('confirm').classList.add('show'); SFX.click(); }
+function cancelReset(){ document.getElementById('confirm').classList.remove('show'); SFX.click(); }
+function doReset(){
+  document.getElementById('confirm').classList.remove('show');
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   state=freshState(); camX=0; camY=0; started=false; unlockedSet={}; terrainCache={}; achQueue=[]; achShowing=false; pendingEvent=null; closeEvent(); zoom=clampZoom(0.6);
+  if(gameLoop){ clearInterval(gameLoop); gameLoop=null; }
   notify('Nowa gra!'); recalc(); updateUI();
   document.getElementById('reset-btn').style.display='none';
   document.getElementById('start-btn').textContent='⚔ ZAŁÓŻ OSADĘ';
+  document.getElementById('intro').style.display='flex';
 }
 
 // =====================================================================
@@ -677,7 +724,7 @@ function drawPlotMarkers(){
 function render(){
   ctx.clearRect(0,0,W,H); ctx.fillStyle='#0e0a12'; ctx.fillRect(0,0,W,H);
   const tl=screenToGrid(-1,-1), br=screenToGrid(W+1,H+1);
-  for(let gy=tl.gy;gy<=br.gy;gy++)for(let gx=tl.gx;gx<=br.gx;gx++){ drawTerrainTile(gx,gy); const b=state.map[`${gx},${gy}`]; if(b&&fogLevel(gx,gy)===0){ drawBuilding(gx,gy,b); if(hasSynergy(gx,gy,b.type)){ const {x,y}=gridToScreen(gx,gy); const s=TILE*zoom; ctx.strokeStyle='#5ad06a'; ctx.lineWidth=2*zoom; ctx.setLineDash([4*zoom,3*zoom]); ctx.strokeRect(x+1,y+1,s-2,s-2); ctx.setLineDash([]); ctx.fillStyle='#5ad06a'; ctx.font=`${11*zoom}px serif`; ctx.textAlign='center'; ctx.fillText('🔗',x+s-8*zoom,y+10*zoom); ctx.textAlign='start'; } } }
+  for(let gy=tl.gy;gy<=br.gy;gy++)for(let gx=tl.gx;gx<=br.gx;gx++){ drawTerrainTile(gx,gy); const b=state.map[`${gx},${gy}`]; if(b&&fogLevel(gx,gy)===0){ drawBuilding(gx,gy,b); if(hasSynergy(gx,gy,b.type)){ const {x,y}=gridToScreen(gx,gy); const s=TILE*zoom; ctx.strokeStyle='#C8922A'; ctx.lineWidth=2*zoom; ctx.setLineDash([4*zoom,3*zoom]); ctx.strokeRect(x+1,y+1,s-2,s-2); ctx.setLineDash([]); ctx.fillStyle='#C8922A'; ctx.font=`${11*zoom}px serif`; ctx.textAlign='center'; ctx.fillText('🔗',x+s-8*zoom,y+10*zoom); ctx.textAlign='start'; } } }
   drawPlotMarkers();
   if(hover&&(selectedBuild||axeMode)){ const {x,y}=gridToScreen(hover.gx,hover.gy); const s=TILE*zoom; let ok=axeMode?canClear(hover.gx,hover.gy):canPlace(hover.gx,hover.gy); ctx.fillStyle=ok?(axeMode?'rgba(74,124,63,0.45)':'rgba(201,162,39,0.4)'):'rgba(139,35,50,0.4)'; ctx.fillRect(x,y,s,s); ctx.strokeStyle=ok?'#e6c558':'#b33a4a'; ctx.lineWidth=2*zoom; ctx.strokeRect(x,y,s,s); }
   // nakładka koloru sezonu
@@ -740,14 +787,15 @@ function knowPerYear(){ let kn=0; for(const k in state.map){const b=state.map[k]
 let tickCount=0;
 function tick(){
   if(pendingEvent) return; // gra wstrzymana podczas decyzji
-  state.month+=3; // kwartał na tick = 4 ticki na rok
+  state.month+=0.5; // pół miesiąca na tick → rok = 24 ticki, sezon co ~6 ticków (30s)
   const newYear = state.month>=12;
   if(newYear){ state.month-=12; state.year++; }
-  state.gold+=Math.round(incomePerYear()/4); state.wood+=woodPerYear(); state.know+=knowPerYear();
+  state.gold+=Math.round(incomePerYear()/24); state.wood+=woodPerYear()/6; state.know+=knowPerYear()/6;
+  state.wood=Math.round(state.wood); state.know=Math.round(state.know);
   if(state.gold>state.stats.peakGold)state.stats.peakGold=state.gold;
   recalc(); // sezon wpływa na żywność
   const keys=Object.keys(state.map);
-  if(keys.length){const rk=keys[Math.floor(Math.random()*keys.length)];const [gx,gy]=rk.split(',').map(Number);if(fogLevel(gx,gy)===0){const sc=gridToScreen(gx,gy);const b=state.map[rk];floatText(sc.x+TILE*zoom/2,sc.y,`+${Math.round(buildingIncome(b.type,b.level,gx,gy)/4)}🪙`);}}
+  if(keys.length){const rk=keys[Math.floor(Math.random()*keys.length)];const [gx,gy]=rk.split(',').map(Number);if(fogLevel(gx,gy)===0){const sc=gridToScreen(gx,gy);const b=state.map[rk];floatText(sc.x+TILE*zoom/2,sc.y,`+${Math.round(buildingIncome(b.type,b.level,gx,gy)/24)}🪙`);}}
   if(state.food<0&&Math.random()<0.3) notify('⚠ Głód! Zbuduj pola.',true);
   if(keys.length>0 && tickCount%3===0) SFX.coin();
   if(newYear){ maybeRaid(); if(!pendingEvent) maybeEvent(); }
@@ -874,8 +922,8 @@ function startGame(){ document.getElementById('intro').style.display='none'; ac(
 // =====================================================================
 //  AUDIO — efekty (Web Audio, syntetyczne) + muzyka (1.mp3, 2.mp3...)
 // =====================================================================
-const settings = { music:false, musicVol:0.5, sfx:true, sfxVol:0.6, vibe:true };
-const SET_KEY='grod_settings_v1';
+const settings = { music:true, musicVol:0.2, sfx:true, sfxVol:0.6, vibe:true };
+const SET_KEY='dziedzic_settings_v1';
 function loadSettings(){ try{ const r=localStorage.getItem(SET_KEY); if(r)Object.assign(settings,JSON.parse(r)); }catch(e){} }
 function saveSettings(){ try{ localStorage.setItem(SET_KEY,JSON.stringify(settings)); }catch(e){} }
 
@@ -960,7 +1008,7 @@ function onMusicVol(){ settings.musicVol=document.getElementById('set-music-vol'
 function onSfxToggle(){ settings.sfx=document.getElementById('set-sfx').checked; saveSettings(); if(settings.sfx)SFX.click(); }
 function onSfxVol(){ settings.sfxVol=document.getElementById('set-sfx-vol').value/100; saveSettings(); SFX.click(); }
 function onVibeToggle(){ settings.vibe=document.getElementById('set-vibe').checked; saveSettings(); if(settings.vibe)vibrate(30); }
-function resetFromSettings(){ closeSettings(); resetGame(); }
+function resetFromSettings(){ closeSettings(); document.getElementById('confirm').classList.add('show'); SFX.click(); }
 
 // =====================================================================
 //  SAMOUCZEK
