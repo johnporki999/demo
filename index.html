@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Gród Piastów</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root { --parchment:#e8dcc0; --parchment-dark:#d4c4a0; --ink:#2a1f14; --gold:#c9a227; --gold-light:#e6c558; --crimson:#8b2332; --crimson-light:#b33a4a; --wood:#4a3526; --wood-dark:#2f2118; --green:#4a7c3f; --shadow:rgba(0,0,0,0.4); }
+  html,body { height:100%; overflow:hidden; background:#1a140d; font-family:'EB Garamond',serif; color:var(--ink); user-select:none; -webkit-user-select:none; touch-action:none; }
+  #game { position:fixed; inset:0; display:flex; flex-direction:column; }
+  #topbar { background:linear-gradient(180deg,#3a2818,#2a1d10); border-bottom:3px solid var(--gold); box-shadow:0 2px 12px var(--shadow); padding:calc(env(safe-area-inset-top) + 6px) 10px 6px; display:flex; align-items:center; gap:6px; z-index:20; position:relative; }
+  #topbar::after { content:''; position:absolute; bottom:-3px; left:0; right:0; height:3px; background:linear-gradient(90deg,transparent,var(--gold-light),transparent); }
+  .resource { background:rgba(0,0,0,0.3); border:1px solid var(--gold); border-radius:6px; padding:4px 7px; display:flex; flex-direction:column; align-items:center; min-width:0; }
+  .resource-row { display:flex; align-items:center; gap:3px; }
+  .resource .ico { font-size:14px; }
+  .resource .val { font-family:'Cinzel'; font-weight:700; color:var(--gold-light); font-size:13px; }
+  .resource .sub { font-size:8px; color:#b8a878; }
+  #title-crest { margin-left:auto; text-align:right; }
+  #title-crest .crest { font-size:18px; }
+  #title-crest .name { font-family:'Cinzel'; font-weight:900; font-size:10px; color:var(--gold); letter-spacing:1px; }
+  #canvas-wrap { flex:1; position:relative; overflow:hidden; background:#243a1c; }
+  #game-canvas { display:block; width:100%; height:100%; }
+  .float-text { position:absolute; font-family:'Cinzel'; font-weight:700; font-size:14px; text-shadow:0 1px 3px #000,0 0 8px #c9a22788; pointer-events:none; z-index:30; animation:floatup 1.2s ease-out forwards; }
+  @keyframes floatup { 0%{transform:translateY(0) scale(0.8);opacity:0;} 20%{opacity:1;transform:translateY(-5px) scale(1.1);} 100%{transform:translateY(-45px) scale(1);opacity:0;} }
+  #build-bar { background:linear-gradient(180deg,#3a2818,#261a0f); border-top:3px solid var(--gold); box-shadow:0 -2px 16px var(--shadow); z-index:20; position:relative; padding-bottom:env(safe-area-inset-bottom); }
+  #build-bar::before { content:''; position:absolute; top:-3px; left:0; right:0; height:3px; background:linear-gradient(90deg,transparent,var(--gold-light),transparent); }
+  #build-scroll { display:flex; gap:8px; overflow-x:auto; padding:10px; scrollbar-width:none; }
+  #build-scroll::-webkit-scrollbar { display:none; }
+  .build-card { flex:0 0 auto; width:78px; background:linear-gradient(160deg,var(--parchment),var(--parchment-dark)); border:2px solid var(--wood); border-radius:8px; padding:6px 4px; text-align:center; cursor:pointer; transition:transform .12s,box-shadow .12s; position:relative; box-shadow:0 2px 6px var(--shadow); }
+  .build-card:active { transform:scale(0.94); }
+  .build-card.selected { border-color:var(--gold); box-shadow:0 0 0 2px var(--gold-light),0 0 14px var(--gold); transform:translateY(-4px); }
+  .build-card.locked { opacity:0.45; filter:grayscale(0.7); }
+  .build-card .card-icon { width:44px; height:44px; margin:0 auto 3px; }
+  .build-card .card-name { font-family:'Cinzel'; font-weight:700; font-size:9px; color:var(--ink); line-height:1.1; height:22px; display:flex; align-items:center; justify-content:center; }
+  .build-card .card-cost { font-size:10px; color:var(--wood-dark); font-weight:500; }
+  .build-card .card-lock { font-size:8px; color:var(--crimson); font-weight:600; }
+  .build-card .card-income { font-size:8px; color:var(--green); }
+  .tool-card { flex:0 0 auto; width:60px; background:linear-gradient(160deg,#3a5224,#243a14); border:2px solid var(--green); border-radius:8px; padding:6px 4px; text-align:center; cursor:pointer; transition:transform .12s; box-shadow:0 2px 6px var(--shadow); color:#d4f0c0; }
+  .tool-card:active { transform:scale(0.94); }
+  .tool-card.selected { box-shadow:0 0 0 2px var(--green),0 0 14px var(--green); transform:translateY(-4px); }
+  .tool-card .tc-ico { font-size:22px; }
+  .tool-card .tc-name { font-family:'Cinzel'; font-weight:700; font-size:8px; line-height:1.1; margin-top:2px; }
+  #side-controls { position:absolute; top:10px; right:8px; display:flex; flex-direction:column; gap:6px; z-index:15; }
+  .ctrl-btn { width:40px; height:40px; background:linear-gradient(160deg,#3a2818,#261a0f); border:2px solid var(--gold); border-radius:8px; color:var(--gold-light); font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 6px var(--shadow); }
+  .ctrl-btn:active { transform:scale(0.92); }
+  #notif { position:absolute; top:12px; left:50%; transform:translateX(-50%) translateY(-80px); background:linear-gradient(160deg,var(--parchment),var(--parchment-dark)); border:2px solid var(--gold); border-radius:8px; padding:8px 16px; font-family:'Cinzel'; font-weight:700; font-size:12px; color:var(--ink); box-shadow:0 4px 16px var(--shadow); z-index:40; transition:transform .3s cubic-bezier(.2,1.4,.4,1); white-space:nowrap; max-width:90vw; text-align:center; }
+  #notif.show { transform:translateX(-50%) translateY(0); }
+  #notif.err { border-color:var(--crimson); color:var(--crimson); }
+  #info-panel { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(180deg,#3a2818,#1f150c); border-top:3px solid var(--gold); border-radius:16px 16px 0 0; padding:14px 16px calc(env(safe-area-inset-bottom) + 14px); z-index:50; transform:translateY(110%); transition:transform .3s cubic-bezier(.2,1,.4,1); box-shadow:0 -4px 20px var(--shadow); }
+  #info-panel.show { transform:translateY(0); }
+  #info-panel .ip-head { display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--gold); padding-bottom:8px; margin-bottom:8px; }
+  #info-panel .ip-icon { width:40px; height:40px; }
+  #info-panel .ip-title { font-family:'Cinzel'; font-weight:900; font-size:16px; color:var(--gold-light); }
+  #info-panel .ip-lvl { font-size:11px; color:#b8a878; }
+  #info-panel .ip-desc { font-style:italic; color:#c4b48c; font-size:13px; margin-bottom:10px; }
+  #info-panel .ip-stats { display:flex; gap:16px; margin-bottom:12px; }
+  #info-panel .ip-stat { color:var(--parchment); font-size:13px; }
+  #info-panel .ip-stat b { color:var(--gold-light); font-family:'Cinzel'; }
+  #info-panel .ip-btns { display:flex; gap:8px; }
+  .ip-action { flex:1; padding:10px; border-radius:8px; font-family:'Cinzel'; font-weight:700; font-size:13px; cursor:pointer; border:2px solid; text-align:center; }
+  .ip-upgrade { background:linear-gradient(160deg,#3a5a2a,#243a18); border-color:var(--green); color:#d4f0c0; }
+  .ip-demolish { background:linear-gradient(160deg,#5a2530,#3a1820); border-color:var(--crimson-light); color:var(--parchment); }
+  .ip-close { position:absolute; top:10px; right:14px; color:var(--gold); font-size:22px; cursor:pointer; line-height:1; }
+  #intro { position:absolute; inset:0; z-index:100; background:radial-gradient(circle at 50% 40%,#3a2818,#14100a); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px; }
+  #intro .crest-big { font-size:64px; margin-bottom:10px; filter:drop-shadow(0 0 20px var(--gold)); }
+  #intro h1 { font-family:'Cinzel'; font-weight:900; font-size:32px; color:var(--gold-light); letter-spacing:3px; margin-bottom:6px; text-shadow:0 2px 12px #000; }
+  #intro .sub { font-style:italic; font-size:15px; color:#c4b48c; margin-bottom:30px; max-width:330px; line-height:1.5; }
+  #intro .start-btn { font-family:'Cinzel'; font-weight:700; font-size:16px; background:linear-gradient(160deg,var(--gold-light),var(--gold)); color:var(--wood-dark); border:none; border-radius:10px; padding:14px 40px; cursor:pointer; letter-spacing:1px; box-shadow:0 4px 16px var(--shadow),inset 0 1px 2px rgba(255,255,255,0.4); }
+  #intro .start-btn:active { transform:scale(0.96); }
+  #intro .channel { margin-top:24px; font-size:12px; color:#8a7a5a; font-style:italic; }
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="topbar">
+    <div class="resource"><div class="resource-row"><span class="ico">🪙</span><span class="val" id="r-gold">0</span></div><div class="sub" id="r-gold-rate">+0/rok</div></div>
+    <div class="resource"><div class="resource-row"><span class="ico">🪵</span><span class="val" id="r-wood">0</span></div><div class="sub">drewno</div></div>
+    <div class="resource"><div class="resource-row"><span class="ico">👥</span><span class="val" id="r-pop">0</span></div><div class="sub">lud</div></div>
+    <div class="resource"><div class="resource-row"><span class="ico">🌾</span><span class="val" id="r-food">0</span></div><div class="sub" id="r-food-sub">żywność</div></div>
+    <div id="title-crest"><div class="crest">🦅</div><div class="name">GRÓD PIASTÓW</div></div>
+  </div>
+  <div id="canvas-wrap">
+    <canvas id="game-canvas"></canvas>
+    <div id="side-controls">
+      <div class="ctrl-btn" onclick="toggleSpeed()" id="speed-btn">⏩</div>
+      <div class="ctrl-btn" onclick="centerView()">🎯</div>
+    </div>
+    <div id="notif"></div>
+    <div id="info-panel">
+      <span class="ip-close" onclick="closeInfo()">✕</span>
+      <div class="ip-head"><div class="ip-icon" id="ip-icon"></div><div><div class="ip-title" id="ip-title">—</div><div class="ip-lvl" id="ip-lvl">Poziom 1</div></div></div>
+      <div class="ip-desc" id="ip-desc"></div>
+      <div class="ip-stats"><div class="ip-stat">Dochód: <b id="ip-income">0</b> 🪙/rok</div><div class="ip-stat" id="ip-pop-stat"></div></div>
+      <div class="ip-btns"><div class="ip-action ip-upgrade" id="ip-upgrade" onclick="doUpgrade()">⬆ Rozbuduj</div><div class="ip-action ip-demolish" onclick="doDemolish()">🔥 Zburz</div></div>
+    </div>
+  </div>
+  <div id="build-bar"><div id="build-scroll"></div></div>
+  <div id="intro">
+    <div class="crest-big">🦅</div><h1>GRÓD PIASTÓW</h1>
+    <div class="sub">Roku Pańskiego 966. Z małej osady zbuduj potęgę. Karczuj lasy, wykupuj ziemie i odkrywaj nieznane krainy — pola, puszcze, rzeki, góry i morze.</div>
+    <button class="start-btn" onclick="startGame()">⚔ ZAŁÓŻ OSADĘ</button>
+    <div class="channel">— scenariusz dla kanału „Dzieje TV" —</div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+//  GRÓD PIASTÓW v3 — nieskończona mapa, mgła, biomy, karczowanie
+// =====================================================================
+const TILE=70, PLOT=5, TICK_MS=1500;
+
+const BUILDINGS = {
+  pole:     { name:'Pole Uprawne', cost:40,   wood:5,   income:3,  pop:0,  food:6,  unlock:0,    desc:'Żyzna ziemia daje chleb i grosz.' },
+  chata:    { name:'Chata',        cost:50,   wood:15,  income:0,  pop:4,  food:-2, unlock:0,    desc:'Dom dla osadników.' },
+  mlyn:     { name:'Młyn',         cost:120,  wood:25,  income:8,  pop:0,  food:4,  unlock:100,  desc:'Mele zboże na mąkę.' },
+  kuznia:   { name:'Kuźnia',       cost:200,  wood:30,  income:14, pop:0,  food:-1, unlock:200,  desc:'Kowal wykuwa narzędzia.' },
+  targ:     { name:'Targowisko',   cost:350,  wood:40,  income:28, pop:0,  food:-2, unlock:400,  desc:'Centrum handlu grodu.' },
+  kosciol:  { name:'Kościół',      cost:600,  wood:50,  income:20, pop:2,  food:0,  unlock:800,  desc:'Wiara jednoczy lud.' },
+  port:     { name:'Port',         cost:900,  wood:80,  income:45, pop:3,  food:5,  unlock:1200, desc:'Handel morski. Buduj nad wodą!', needsWater:true },
+  grod:     { name:'Gród Warowny', cost:1200, wood:100, income:50, pop:8,  food:-4, unlock:1500, desc:'Drewniana warownia.' },
+  kopalnia: { name:'Kopalnia',     cost:1800, wood:60,  income:70, pop:2,  food:-3, unlock:2000, desc:'Wydobycie rud. Buduj w górach!', needsMountain:true },
+  klasztor: { name:'Klasztor',     cost:2500, wood:120, income:75, pop:4,  food:3,  unlock:3000, desc:'Mnisi spisują kroniki.' },
+  zamek:    { name:'Zamek',        cost:4000, wood:200, income:120,pop:12, food:-6, unlock:5000, desc:'Kamienny zamek. Potęga rodu.' },
+};
+
+const UPGRADE_MULT=1.6;
+// kolory gwiazdek wg "tieru" co 5 poziomów
+const STAR_TIERS=['#a06a3a','#c0c0c8','#e6c558','#5ad0e0','#c060e0','#ff5a5a']; // brąz,srebro,złoto,turkus,fiolet,czerwony
+
+let state = {
+  gold:120, wood:80, pop:0, food:0, map:{}, cleared:{}, year:966, speed:1,
+  ownedPlots:{'0,0':true}, plotsBought:1,
+};
+let camX=0, camY=0, camStartX=0, camStartY=0;
+let dragging=false, dragMoved=false, pinchDist=0, zoom=0.6;
+let selectedBuild=null, selectedTile=null, axeMode=false;
+let canvas, ctx, W, H, dpr, hover=null;
+let gameLoop=null, started=false;
+
+// =====================================================================
+//  INFINITE COORDS (camera-centered around 0,0)
+// =====================================================================
+function gridToScreen(gx,gy){ return { x: gx*TILE*zoom + camX + W/2, y: gy*TILE*zoom + camY + H/2 }; }
+function screenToGrid(sx,sy){ return { gx: Math.floor((sx-camX-W/2)/(TILE*zoom)), gy: Math.floor((sy-camY-H/2)/(TILE*zoom)) }; }
+function plotOf(gx,gy){ return `${Math.floor(gx/PLOT)},${Math.floor(gy/PLOT)}`; }
+function plotOwned(gx,gy){ return !!state.ownedPlots[plotOf(gx,gy)]; }
+function plotCost(){ return Math.round(250 * Math.pow(2.1, state.plotsBought-1)); } // WYKŁADNICZO drożej
+
+// distance from center (0,0) in plots
+function plotDist(px,py){ return Math.max(Math.abs(px),Math.abs(py)); }
+
+// =====================================================================
+//  PROCEDURAL TERRAIN — biomes change with distance
+// =====================================================================
+function sRand(x,y,s=1337){ let n=Math.sin(x*127.1+y*311.7+s)*43758.5453; return n-Math.floor(n); }
+// smooth value noise
+function noise(x,y,s){
+  const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;
+  const tl=sRand(xi,yi,s),tr=sRand(xi+1,yi,s),bl=sRand(xi,yi+1,s),br=sRand(xi+1,yi+1,s);
+  const u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+  return tl*(1-u)*(1-v)+tr*u*(1-v)+bl*(1-u)*v+br*u*v;
+}
+// returns terrain type for ANY tile (infinite)
+const terrainCache={};
+function getTerrain(gx,gy){
+  const key=`${gx},${gy}`;
+  if(terrainCache[key]) return terrainCache[key];
+  if(state.cleared[key]){ const t={type:'grass',v:sRand(gx,gy),cleared:true}; terrainCache[key]=t; return t; }
+  // distance from origin → biome ring
+  const dist=Math.hypot(gx,gy);
+  const n=noise(gx*0.18,gy*0.18,11);
+  const n2=noise(gx*0.4,gy*0.4,55);
+  let type='grass';
+  // central zone (close): plains + light forest
+  if(dist<8){
+    if(n>0.72) type='forest';
+    else if(n<0.12 && n2>0.5) type='water';
+    else type='grass';
+  } else if(dist<16){ // puszcza — dużo lasu
+    if(n>0.45) type='forest';
+    else if(n<0.18) type='water';
+    else type='grass';
+  } else if(dist<26){ // rzeki i bagna
+    if(n2<0.32) type='water';
+    else if(n>0.6) type='forest';
+    else type='grass';
+  } else if(dist<38){ // góry
+    if(n>0.5) type='mountain';
+    else if(n<0.2) type='water';
+    else type='grass';
+  } else { // morze i wyspy
+    if(n>0.66) type='mountain';
+    else if(n>0.5) type='grass';
+    else type='water';
+  }
+  const t={type, v:sRand(gx,gy)};
+  terrainCache[key]=t; return t;
+}
+
+// =====================================================================
+//  DRAW TERRAIN + FOG BLUR
+// =====================================================================
+function biomeColor(t){
+  if(t.type==='water') return t.v>0.5?'#3f7396':'#356585';
+  if(t.type==='forest') return '#3a6b32';
+  if(t.type==='mountain') return t.v>0.5?'#8a8378':'#6e6860';
+  if(t.type==='sand') return '#cbb778';
+  return t.v>0.5?'#6ba24a':'#5e9440';
+}
+// fog: how hidden a tile is based on distance from owned land
+function fogLevel(gx,gy){
+  if(plotOwned(gx,gy)) return 0;
+  const px=Math.floor(gx/PLOT), py=Math.floor(gy/PLOT);
+  // distance (in plots) to nearest owned plot
+  let best=99;
+  for(const k in state.ownedPlots){ const [ox,oy]=k.split(',').map(Number); best=Math.min(best,Math.max(Math.abs(px-ox),Math.abs(py-oy))); }
+  return best; // 1=adjacent (light), 2+, increasing fog
+}
+
+function drawTerrainTile(gx,gy){
+  const t=getTerrain(gx,gy);
+  const {x,y}=gridToScreen(gx,gy); const s=TILE*zoom;
+  const fog=fogLevel(gx,gy);
+
+  let col=biomeColor(t);
+  ctx.fillStyle=col; ctx.fillRect(x,y,s+1,s+1);
+
+  // details only if reasonably visible
+  if(fog<3){
+    if(t.type==='grass'&&!t.cleared){ ctx.strokeStyle='rgba(40,80,30,0.3)'; ctx.lineWidth=1;
+      for(let i=0;i<3;i++){ const bx=x+s*(0.2+sRand(gx+i,gy,3)*0.6),by=y+s*(0.3+sRand(gx,gy+i,5)*0.5);
+        ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx-1.5*zoom,by-5*zoom); ctx.stroke(); } }
+    if(t.cleared){ ctx.fillStyle='rgba(120,90,50,0.25)'; ctx.fillRect(x+s*0.2,y+s*0.2,s*0.6,s*0.6); } // karczowisko
+    if(t.type==='water'){ ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1.5*zoom;
+      ctx.beginPath(); ctx.moveTo(x+s*0.2,y+s*0.4); ctx.quadraticCurveTo(x+s*0.4,y+s*0.3,x+s*0.6,y+s*0.45); ctx.stroke(); }
+    if(t.type==='forest'){ drawTreeTop(x+s*0.3,y+s*0.35,s*0.26); drawTreeTop(x+s*0.66,y+s*0.62,s*0.2); drawTreeTop(x+s*0.55,y+s*0.25,s*0.16); }
+    if(t.type==='mountain'){ // peak
+      ctx.fillStyle='#5a544c'; ctx.beginPath(); ctx.moveTo(x+s*0.5,y+s*0.15); ctx.lineTo(x+s*0.8,y+s*0.8); ctx.lineTo(x+s*0.2,y+s*0.8); ctx.fill();
+      ctx.fillStyle='#e8e8ec'; ctx.beginPath(); ctx.moveTo(x+s*0.5,y+s*0.15); ctx.lineTo(x+s*0.62,y+s*0.42); ctx.lineTo(x+s*0.38,y+s*0.42); ctx.fill(); } // snow cap
+  }
+
+  ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=1; ctx.strokeRect(x,y,s,s);
+
+  // FOG OF WAR — blur via translucent dark layers, stronger with distance
+  if(fog>0){
+    const alpha=Math.min(0.85, 0.22*fog);
+    ctx.fillStyle=`rgba(14,10,18,${alpha})`;
+    ctx.fillRect(x,y,s+1,s+1);
+    // misty speckle for far tiles
+    if(fog>=3){ ctx.fillStyle='rgba(60,55,75,0.25)'; ctx.fillRect(x,y,s+1,s+1); }
+  }
+}
+function drawTreeTop(cx,cy,r){ ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.beginPath(); ctx.arc(cx+r*0.15,cy+r*0.2,r,0,6.28); ctx.fill(); ctx.fillStyle='#2d5a26'; ctx.beginPath(); ctx.arc(cx,cy,r,0,6.28); ctx.fill(); ctx.fillStyle='#3a7032'; ctx.beginPath(); ctx.arc(cx-r*0.25,cy-r*0.25,r*0.6,0,6.28); ctx.fill(); }
+
+// =====================================================================
+//  BUILDINGS ART (top-down)
+// =====================================================================
+function drawBuilding(gx,gy,b){
+  const {x,y}=gridToScreen(gx,gy); const s=TILE*zoom; const cx=x+s/2,cy=y+s/2;
+  ctx.save(); buildingArt(b.type,x,y,s); 
+  // tiered colored stars
+  const tier=Math.floor((b.level-1)/5);
+  const inTier=((b.level-1)%5)+1;
+  if(b.level>1){
+    const col=STAR_TIERS[Math.min(tier,STAR_TIERS.length-1)];
+    ctx.fillStyle=col; ctx.font=`${10*zoom}px serif`; ctx.textAlign='center'; ctx.shadowColor='#000'; ctx.shadowBlur=2;
+    ctx.fillText('★'.repeat(inTier), cx, y+s-3*zoom); ctx.shadowBlur=0;
+  }
+  ctx.restore();
+}
+function buildingArt(type,x,y,s){
+  const cx=x+s/2,cy=y+s/2,pad=s*0.12;
+  ctx.fillStyle='rgba(0,0,0,0.25)'; ctx.fillRect(x+pad+2,y+pad+2,s-pad*2,s-pad*2);
+  function roof(c1,c2,ins){ const p=s*ins; ctx.fillStyle=c2; ctx.fillRect(x+p,y+p,s-p*2,s-p*2);
+    ctx.fillStyle=c1; ctx.beginPath(); ctx.moveTo(x+p,y+p); ctx.lineTo(x+s-p,y+p); ctx.lineTo(cx,cy); ctx.fill();
+    ctx.fillStyle=shade(c1,-0.15); ctx.beginPath(); ctx.moveTo(x+p,y+s-p); ctx.lineTo(x+s-p,y+s-p); ctx.lineTo(cx,cy); ctx.fill();
+    ctx.fillStyle=shade(c2,-0.1); ctx.beginPath(); ctx.moveTo(x+p,y+p); ctx.lineTo(x+p,y+s-p); ctx.lineTo(cx,cy); ctx.fill();
+    ctx.fillStyle=shade(c2,0.05); ctx.beginPath(); ctx.moveTo(x+s-p,y+p); ctx.lineTo(x+s-p,y+s-p); ctx.lineTo(cx,cy); ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.lineWidth=1.5*zoom; ctx.strokeRect(x+p,y+p,s-p*2,s-p*2); }
+  switch(type){
+    case 'pole': ctx.fillStyle='#b5933f'; ctx.fillRect(x+s*0.06,y+s*0.06,s*0.88,s*0.88); ctx.strokeStyle='#8a6a28'; ctx.lineWidth=2*zoom;
+      for(let i=1;i<6;i++){ctx.beginPath();ctx.moveTo(x+s*0.06,y+s*0.06+i*s*0.146);ctx.lineTo(x+s*0.94,y+s*0.06+i*s*0.146);ctx.stroke();}
+      ctx.fillStyle='#d4b84a'; for(let i=0;i<6;i++)for(let j=0;j<6;j++){if((i+j)%2)ctx.fillRect(x+s*0.12+i*s*0.13,y+s*0.1+j*s*0.13,s*0.05,s*0.05);} break;
+    case 'chata': roof('#8a6230','#6b4a22',0.18); ctx.strokeStyle='rgba(60,40,15,0.4)'; ctx.lineWidth=1;
+      for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(x+s*0.2+i*s*0.15,y+s*0.2);ctx.lineTo(cx,cy);ctx.stroke();} break;
+    case 'mlyn': roof('#9a8055','#5a4a30',0.2); const t=Date.now()/600; ctx.save(); ctx.translate(cx,cy); ctx.rotate(t);
+      ctx.strokeStyle='#3a2a18'; ctx.lineWidth=3*zoom; for(let i=0;i<4;i++){ctx.rotate(Math.PI/2);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(s*0.34,0);ctx.stroke();ctx.fillStyle='rgba(220,210,180,0.7)';ctx.fillRect(s*0.18,-s*0.05,s*0.16,s*0.1);} ctx.restore();
+      ctx.fillStyle='#3a2a18'; ctx.beginPath(); ctx.arc(cx,cy,s*0.05,0,6.28); ctx.fill(); break;
+    case 'kuznia': roof('#5a5a5a','#3a3a3a',0.18); ctx.fillStyle='#4a3020'; ctx.fillRect(x+s*0.7,y+s*0.18,s*0.12,s*0.12);
+      ctx.fillStyle='rgba(180,180,180,0.4)'; const tt=Date.now()/300; ctx.beginPath(); ctx.arc(x+s*0.76+Math.sin(tt)*3*zoom,y+s*0.1,s*0.07,0,6.28); ctx.fill(); break;
+    case 'targ': ctx.fillStyle='#7a5a36'; ctx.fillRect(x+s*0.08,y+s*0.08,s*0.84,s*0.84); const cls=['#b33a4a','#3a6b8a','#c9a227','#4a7c3f'];
+      for(let i=0;i<4;i++){const sx=x+s*(0.12+(i%2)*0.42),sy=y+s*(0.12+Math.floor(i/2)*0.42);ctx.fillStyle=cls[i];ctx.fillRect(sx,sy,s*0.34,s*0.2);ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(sx,sy+s*0.2,s*0.34,s*0.14);} break;
+    case 'kosciol': roof('#b04050','#7a2030',0.16); ctx.strokeStyle='#e6c558'; ctx.lineWidth=3*zoom;
+      ctx.beginPath();ctx.moveTo(cx,cy-s*0.18);ctx.lineTo(cx,cy+s*0.18);ctx.stroke(); ctx.beginPath();ctx.moveTo(cx-s*0.12,cy-s*0.05);ctx.lineTo(cx+s*0.12,cy-s*0.05);ctx.stroke(); break;
+    case 'port': ctx.fillStyle='#5a4a32'; ctx.fillRect(x+s*0.1,y+s*0.5,s*0.8,s*0.4); // pier
+      ctx.strokeStyle='#3a2a18'; ctx.lineWidth=2*zoom; for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(x+s*0.15+i*s*0.16,y+s*0.5);ctx.lineTo(x+s*0.15+i*s*0.16,y+s*0.9);ctx.stroke();}
+      // boat
+      ctx.fillStyle='#6b4a28'; ctx.beginPath(); ctx.moveTo(x+s*0.2,y+s*0.25); ctx.lineTo(x+s*0.6,y+s*0.25); ctx.lineTo(x+s*0.5,y+s*0.4); ctx.lineTo(x+s*0.3,y+s*0.4); ctx.fill();
+      ctx.strokeStyle='#3a2a18'; ctx.lineWidth=2*zoom; ctx.beginPath(); ctx.moveTo(x+s*0.4,y+s*0.25); ctx.lineTo(x+s*0.4,y+s*0.05); ctx.stroke();
+      ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(x+s*0.4,y+s*0.07); ctx.lineTo(x+s*0.4,y+s*0.22); ctx.lineTo(x+s*0.55,y+s*0.15); ctx.fill(); break;
+    case 'kopalnia': ctx.fillStyle='#6e6860'; ctx.fillRect(x+s*0.1,y+s*0.1,s*0.8,s*0.8); // rocky
+      ctx.fillStyle='#2a2420'; ctx.beginPath(); ctx.arc(cx,cy+s*0.05,s*0.22,Math.PI,0); ctx.fill(); // mine entrance arch
+      ctx.fillStyle='#4a3a28'; ctx.fillRect(cx-s*0.22,cy+s*0.05,s*0.05,s*0.3); ctx.fillRect(cx+s*0.17,cy+s*0.05,s*0.05,s*0.3); // supports
+      ctx.fillStyle='#c9a227'; ctx.beginPath(); ctx.arc(x+s*0.25,y+s*0.25,s*0.05,0,6.28); ctx.fill(); ctx.beginPath(); ctx.arc(x+s*0.75,y+s*0.3,s*0.04,0,6.28); ctx.fill(); break; // ore
+    case 'klasztor': ctx.fillStyle='#c8b890'; ctx.fillRect(x+s*0.08,y+s*0.08,s*0.84,s*0.84); ctx.fillStyle='#6a3020';
+      ctx.fillRect(x+s*0.08,y+s*0.08,s*0.84,s*0.18); ctx.fillRect(x+s*0.08,y+s*0.74,s*0.84,s*0.18); ctx.fillRect(x+s*0.08,y+s*0.08,s*0.18,s*0.84); ctx.fillRect(x+s*0.74,y+s*0.08,s*0.18,s*0.84);
+      ctx.fillStyle='#4a7c3f'; ctx.fillRect(x+s*0.3,y+s*0.3,s*0.4,s*0.4); ctx.strokeStyle='#e6c558'; ctx.lineWidth=2*zoom;
+      ctx.beginPath();ctx.moveTo(cx,cy-s*0.08);ctx.lineTo(cx,cy+s*0.08);ctx.stroke(); ctx.beginPath();ctx.moveTo(cx-s*0.05,cy-s*0.02);ctx.lineTo(cx+s*0.05,cy-s*0.02);ctx.stroke(); break;
+    case 'grod': ctx.fillStyle='#6b5535'; ctx.fillRect(x+s*0.06,y+s*0.06,s*0.88,s*0.88); ctx.strokeStyle='#4a3a22'; ctx.lineWidth=4*zoom; ctx.strokeRect(x+s*0.1,y+s*0.1,s*0.8,s*0.8);
+      ctx.fillStyle='#3a2d1a'; for(let i=0;i<8;i++){ctx.fillRect(x+s*0.1+i*s*0.1,y+s*0.06,s*0.05,s*0.06);ctx.fillRect(x+s*0.1+i*s*0.1,y+s*0.88,s*0.05,s*0.06);}
+      roof('#7a5a38','#4a3526',0.34); drawFlag(cx,cy); break;
+    case 'zamek': ctx.fillStyle='#9a9080'; ctx.fillRect(x+s*0.06,y+s*0.06,s*0.88,s*0.88); ctx.strokeStyle='#6a6055'; ctx.lineWidth=5*zoom; ctx.strokeRect(x+s*0.12,y+s*0.12,s*0.76,s*0.76);
+      const tw=s*0.2; [[0.06,0.06],[0.74,0.06],[0.06,0.74],[0.74,0.74]].forEach(([dx,dy])=>{ctx.fillStyle='#b0a890';ctx.fillRect(x+s*dx,y+s*dy,tw,tw);ctx.fillStyle='#5a2530';ctx.beginPath();ctx.arc(x+s*dx+tw/2,y+s*dy+tw/2,tw*0.35,0,6.28);ctx.fill();});
+      roof('#c0b8a0','#7a7060',0.36); drawFlag(cx,cy); break;
+    default: roof('#8a6a42','#5a4a2a',0.18);
+  }
+}
+function drawFlag(cx,cy){ const s=TILE*zoom; ctx.fillStyle='#fff'; ctx.fillRect(cx+s*0.02,cy-s*0.12,s*0.14,s*0.05); ctx.fillStyle='#d11'; ctx.fillRect(cx+s*0.02,cy-s*0.07,s*0.14,s*0.05); ctx.strokeStyle='#2a1a0a'; ctx.lineWidth=1.5*zoom; ctx.beginPath(); ctx.moveTo(cx+s*0.02,cy-s*0.12); ctx.lineTo(cx+s*0.02,cy+s*0.04); ctx.stroke(); }
+function shade(hex,amt){ let c=hex.replace('#',''); if(c.length===3)c=c.split('').map(x=>x+x).join(''); let r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16); r=Math.max(0,Math.min(255,r+r*amt)); g=Math.max(0,Math.min(255,g+g*amt)); b=Math.max(0,Math.min(255,b+b*amt)); return `rgb(${r|0},${g|0},${b|0})`; }
+
+// =====================================================================
+//  PLOT BUY MARKERS
+// =====================================================================
+function drawPlotMarkers(){
+  // determine visible plot range
+  const tl=screenToGrid(0,0), br=screenToGrid(W,H);
+  const p0x=Math.floor(tl.gx/PLOT)-1, p1x=Math.floor(br.gx/PLOT)+1;
+  const p0y=Math.floor(tl.gy/PLOT)-1, p1y=Math.floor(br.gy/PLOT)+1;
+  for(let py=p0y;py<=p1y;py++)for(let px=p0x;px<=p1x;px++){
+    if(state.ownedPlots[`${px},${py}`]) continue;
+    const adj=state.ownedPlots[`${px-1},${py}`]||state.ownedPlots[`${px+1},${py}`]||state.ownedPlots[`${px},${py-1}`]||state.ownedPlots[`${px},${py+1}`];
+    if(!adj) continue;
+    const {x,y}=gridToScreen(px*PLOT,py*PLOT); const s=TILE*zoom*PLOT; const cx=x+s/2,cy=y+s/2;
+    ctx.strokeStyle='#e6c558'; ctx.lineWidth=3*zoom; ctx.setLineDash([10*zoom,6*zoom]); ctx.strokeRect(x+4,y+4,s-8,s-8); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(20,12,6,0.8)'; const bw=s*0.62,bh=36*zoom; ctx.fillRect(cx-bw/2,cy-bh/2,bw,bh);
+    ctx.strokeStyle='#c9a227'; ctx.lineWidth=2*zoom; ctx.strokeRect(cx-bw/2,cy-bh/2,bw,bh);
+    ctx.fillStyle='#e6c558'; ctx.textAlign='center'; ctx.font=`bold ${13*zoom}px Cinzel,serif`; ctx.fillText('🪙 KUP ZIEMIĘ',cx,cy-2*zoom);
+    ctx.font=`${12*zoom}px Cinzel,serif`; ctx.fillText(fmt(plotCost())+' 🪙',cx,cy+14*zoom); ctx.textAlign='start';
+  }
+}
+
+// =====================================================================
+//  RENDER
+// =====================================================================
+function render(){
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#0e0a12'; ctx.fillRect(0,0,W,H);
+  const tl=screenToGrid(-1,-1), br=screenToGrid(W+1,H+1);
+  for(let gy=tl.gy;gy<=br.gy;gy++)for(let gx=tl.gx;gx<=br.gx;gx++){
+    drawTerrainTile(gx,gy);
+    const b=state.map[`${gx},${gy}`]; if(b&&fogLevel(gx,gy)===0) drawBuilding(gx,gy,b);
+  }
+  drawPlotMarkers();
+  if(hover&&(selectedBuild||axeMode)){
+    const {x,y}=gridToScreen(hover.gx,hover.gy); const s=TILE*zoom;
+    let ok = axeMode ? canClear(hover.gx,hover.gy) : canPlace(hover.gx,hover.gy);
+    ctx.fillStyle=ok?(axeMode?'rgba(74,124,63,0.45)':'rgba(201,162,39,0.4)'):'rgba(139,35,50,0.4)';
+    ctx.fillRect(x,y,s,s); ctx.strokeStyle=ok?'#e6c558':'#b33a4a'; ctx.lineWidth=2*zoom; ctx.strokeRect(x,y,s,s);
+  }
+  requestAnimationFrame(render);
+}
+
+// =====================================================================
+//  ACTIONS
+// =====================================================================
+function canClear(gx,gy){ if(!plotOwned(gx,gy))return false; const t=getTerrain(gx,gy); return t.type==='forest'&&!state.map[`${gx},${gy}`]; }
+function clearForest(gx,gy){
+  if(!canClear(gx,gy)){ notify('Tu nie ma lasu do wykarczowania!',true); return; }
+  const woodGain=20;
+  state.cleared[`${gx},${gy}`]=true; delete terrainCache[`${gx},${gy}`];
+  state.wood+=woodGain; notify(`Las wykarczowany! +${woodGain}🪵`);
+  const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`+${woodGain}🪵`,'#a0d060'); updateUI();
+}
+function canPlace(gx,gy){
+  if(!plotOwned(gx,gy))return false;
+  const t=getTerrain(gx,gy); const bd=BUILDINGS[selectedBuild]; if(!bd)return false;
+  if(state.map[`${gx},${gy}`])return false;
+  if(bd.needsWater) return t.type==='water'; // port needs water tile
+  if(bd.needsMountain) return t.type==='mountain';
+  if(t.type==='water'||t.type==='mountain') return false;
+  if(t.type==='forest') return false; // must clear first
+  return true;
+}
+function placeBuilding(gx,gy){
+  const bd=BUILDINGS[selectedBuild];
+  if(!plotOwned(gx,gy)){ notify('Najpierw wykup ziemię!',true); return; }
+  const t=getTerrain(gx,gy);
+  if(t.type==='forest'){ notify('Najpierw wykarczuj las! 🪓',true); return; }
+  if(!canPlace(gx,gy)){ 
+    if(bd.needsWater) notify('Port buduj na wodzie! 🌊',true);
+    else if(bd.needsMountain) notify('Kopalnię buduj w górach! ⛰️',true);
+    else notify('Nie można tu budować!',true); return; }
+  if(state.gold<bd.cost){ notify(`Brakuje grosza! (${bd.cost}🪙)`,true); return; }
+  if(state.wood<bd.wood){ notify(`Brakuje drewna! (${bd.wood}🪵) Karczuj las.`,true); return; }
+  state.gold-=bd.cost; state.wood-=bd.wood;
+  state.map[`${gx},${gy}`]={type:selectedBuild,level:1};
+  recalc(); notify(`${bd.name} wzniesiona!`);
+  const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`-${bd.cost}🪙`,'#b33a4a'); updateUI();
+}
+function tryBuyPlot(gx,gy){
+  const px=Math.floor(gx/PLOT),py=Math.floor(gy/PLOT),key=`${px},${py}`;
+  if(state.ownedPlots[key])return false;
+  const adj=state.ownedPlots[`${px-1},${py}`]||state.ownedPlots[`${px+1},${py}`]||state.ownedPlots[`${px},${py-1}`]||state.ownedPlots[`${px},${py+1}`];
+  if(!adj){ notify('Kupuj tylko ziemię obok swojej!',true); return true; }
+  const cost=plotCost();
+  if(state.gold<cost){ notify(`Brakuje grosza na ziemię (${fmt(cost)}🪙)`,true); return true; }
+  state.gold-=cost; state.ownedPlots[key]=true; state.plotsBought++;
+  notify('Nowa kraina odkryta! 🗺️');
+  const sc=gridToScreen(px*PLOT+PLOT/2,py*PLOT+PLOT/2); floatText(sc.x,sc.y,`-${fmt(cost)}🪙`,'#b33a4a'); updateUI();
+  return true;
+}
+
+// =====================================================================
+//  ECONOMY
+// =====================================================================
+function recalc(){ let pop=0,food=0; for(const k in state.map){const b=state.map[k],bd=BUILDINGS[b.type];pop+=bd.pop*b.level;food+=bd.food*b.level;} state.pop=pop; state.food=food; }
+function incomePerYear(){ let inc=0; for(const k in state.map){const b=state.map[k],bd=BUILDINGS[b.type];inc+=bd.income*b.level;} inc+=state.pop*1; if(state.food<0)inc*=0.4; return Math.round(inc); }
+function woodPerYear(){ let w=0; for(const k in state.map){const b=state.map[k];if(b.type==='klasztor'||b.type==='grod')w+=2*b.level;} return w; } // small passive wood
+function tick(){
+  state.gold+=incomePerYear(); state.wood+=woodPerYear(); state.year++;
+  const keys=Object.keys(state.map);
+  if(keys.length){const rk=keys[Math.floor(Math.random()*keys.length)];const [gx,gy]=rk.split(',').map(Number);if(fogLevel(gx,gy)===0){const sc=gridToScreen(gx,gy);const b=state.map[rk];floatText(sc.x+TILE*zoom/2,sc.y,`+${BUILDINGS[b.type].income*b.level}🪙`);}}
+  if(state.food<0&&Math.random()<0.3) notify('⚠ Głód! Zbuduj pola.',true);
+  updateUI();
+}
+
+// =====================================================================
+//  UI
+// =====================================================================
+function updateUI(){
+  document.getElementById('r-gold').textContent=fmt(state.gold);
+  document.getElementById('r-gold-rate').textContent=`+${fmt(incomePerYear())}/rok`;
+  document.getElementById('r-wood').textContent=fmt(state.wood);
+  document.getElementById('r-pop').textContent=fmt(state.pop);
+  const fe=document.getElementById('r-food'); fe.textContent=(state.food>=0?'+':'')+fmt(state.food);
+  fe.style.color=state.food<0?'#e06a6a':'#e6c558'; document.getElementById('r-food-sub').textContent=state.food<0?'⚠ głód!':'żywność';
+  renderBuildBar();
+}
+function renderBuildBar(){
+  const sc=document.getElementById('build-scroll');
+  if(sc.children.length===Object.keys(BUILDINGS).length+1){ updateAxe(sc.children[0]); let i=1; for(const t in BUILDINGS){updateCard(sc.children[i],t);i++;} return; }
+  sc.innerHTML='';
+  // AXE TOOL first
+  const axe=document.createElement('div'); axe.className='tool-card'; axe.id='axe-card';
+  axe.innerHTML=`<div class="tc-ico">🪓</div><div class="tc-name">Karczuj<br>las</div>`;
+  axe.onclick=()=>{ axeMode=!axeMode; selectedBuild=null; closeInfo(); updateUI(); };
+  sc.appendChild(axe); updateAxe(axe);
+  for(const type in BUILDINGS){
+    const bd=BUILDINGS[type]; const card=document.createElement('div'); card.className='build-card'; card.dataset.type=type;
+    card.onclick=()=>selectBuild(type);
+    card.innerHTML=`<canvas class="card-icon" width="44" height="44"></canvas><div class="card-name">${bd.name}</div><div class="card-cost"></div>`;
+    sc.appendChild(card); miniIcon(card.querySelector('canvas').getContext('2d'),type); updateCard(card,type);
+  }
+}
+function updateAxe(axe){ axe.classList.toggle('selected',axeMode); }
+let unlockedSet={};
+function hasUnlocked(type){ if(unlockedSet[type])return true; if(state.gold>=BUILDINGS[type].unlock){unlockedSet[type]=true;return true;} return false; }
+function updateCard(card,type){
+  const bd=BUILDINGS[type]; const locked=state.gold<bd.unlock&&!hasUnlocked(type);
+  card.classList.toggle('locked',locked); card.classList.toggle('selected',selectedBuild===type);
+  const c=card.querySelector('.card-cost');
+  if(locked) c.innerHTML=`<span class="card-lock">🔒 ${fmt(bd.unlock)}🪙</span>`;
+  else c.innerHTML=`${fmt(bd.cost)}🪙 ${bd.wood}🪵<div class="card-income">+${bd.income}/r</div>`;
+}
+function miniIcon(c,type){
+  const x=4,y=4,s=36,cx=x+s/2,cy=y+s/2;
+  function roof(c1,c2,ins){const p=s*ins;c.fillStyle=c2;c.fillRect(x+p,y+p,s-p*2,s-p*2);c.fillStyle=c1;c.beginPath();c.moveTo(x+p,y+p);c.lineTo(x+s-p,y+p);c.lineTo(cx,cy);c.fill();c.fillStyle=shade(c1,-0.15);c.beginPath();c.moveTo(x+p,y+s-p);c.lineTo(x+s-p,y+s-p);c.lineTo(cx,cy);c.fill();c.fillStyle=shade(c2,-0.1);c.beginPath();c.moveTo(x+p,y+p);c.lineTo(x+p,y+s-p);c.lineTo(cx,cy);c.fill();c.fillStyle=shade(c2,0.05);c.beginPath();c.moveTo(x+s-p,y+p);c.lineTo(x+s-p,y+s-p);c.lineTo(cx,cy);c.fill();}
+  switch(type){
+    case 'pole': c.fillStyle='#b5933f';c.fillRect(x,y,s,s);c.strokeStyle='#8a6a28';c.lineWidth=1.5;for(let i=1;i<5;i++){c.beginPath();c.moveTo(x,y+i*s/5);c.lineTo(x+s,y+i*s/5);c.stroke();}break;
+    case 'chata': roof('#8a6230','#6b4a22',0.18);break;
+    case 'mlyn': roof('#9a8055','#5a4a30',0.2);c.strokeStyle='#3a2a18';c.lineWidth=2;for(let i=0;i<4;i++){c.save();c.translate(cx,cy);c.rotate(i*Math.PI/2);c.beginPath();c.moveTo(0,0);c.lineTo(s*0.34,0);c.stroke();c.restore();}break;
+    case 'kuznia': roof('#5a5a5a','#3a3a3a',0.18);c.fillStyle='#4a3020';c.fillRect(x+s*0.66,y+s*0.14,s*0.14,s*0.14);break;
+    case 'targ': c.fillStyle='#7a5a36';c.fillRect(x,y,s,s);const cl=['#b33a4a','#3a6b8a','#c9a227','#4a7c3f'];for(let i=0;i<4;i++){c.fillStyle=cl[i];c.fillRect(x+(i%2)*s*0.5+s*0.05,y+Math.floor(i/2)*s*0.5+s*0.05,s*0.38,s*0.22);}break;
+    case 'kosciol': roof('#b04050','#7a2030',0.16);c.strokeStyle='#e6c558';c.lineWidth=2.5;c.beginPath();c.moveTo(cx,cy-s*0.16);c.lineTo(cx,cy+s*0.16);c.stroke();c.beginPath();c.moveTo(cx-s*0.1,cy-s*0.04);c.lineTo(cx+s*0.1,cy-s*0.04);c.stroke();break;
+    case 'port': c.fillStyle='#356585';c.fillRect(x,y,s,s);c.fillStyle='#5a4a32';c.fillRect(x+s*0.1,y+s*0.55,s*0.8,s*0.35);c.fillStyle='#6b4a28';c.beginPath();c.moveTo(x+s*0.2,y+s*0.2);c.lineTo(x+s*0.6,y+s*0.2);c.lineTo(x+s*0.5,y+s*0.38);c.lineTo(x+s*0.3,y+s*0.38);c.fill();c.fillStyle='#fff';c.beginPath();c.moveTo(x+s*0.4,y+s*0.05);c.lineTo(x+s*0.4,y+s*0.2);c.lineTo(x+s*0.55,y+s*0.13);c.fill();break;
+    case 'kopalnia': c.fillStyle='#6e6860';c.fillRect(x,y,s,s);c.fillStyle='#2a2420';c.beginPath();c.arc(cx,cy+s*0.05,s*0.22,Math.PI,0);c.fill();c.fillStyle='#c9a227';c.beginPath();c.arc(x+s*0.25,y+s*0.25,s*0.06,0,6.28);c.fill();break;
+    case 'klasztor': c.fillStyle='#c8b890';c.fillRect(x,y,s,s);c.fillStyle='#6a3020';c.fillRect(x,y,s,s*0.2);c.fillRect(x,y+s*0.8,s,s*0.2);c.fillRect(x,y,s*0.2,s);c.fillRect(x+s*0.8,y,s*0.2,s);c.fillStyle='#4a7c3f';c.fillRect(x+s*0.28,y+s*0.28,s*0.44,s*0.44);break;
+    case 'grod': c.fillStyle='#6b5535';c.fillRect(x,y,s,s);c.strokeStyle='#4a3a22';c.lineWidth=3;c.strokeRect(x+s*0.1,y+s*0.1,s*0.8,s*0.8);roof('#7a5a38','#4a3526',0.34);c.fillStyle='#fff';c.fillRect(cx,cy-s*0.1,s*0.12,s*0.04);c.fillStyle='#d11';c.fillRect(cx,cy-s*0.06,s*0.12,s*0.04);break;
+    case 'zamek': c.fillStyle='#9a9080';c.fillRect(x,y,s,s);[[0,0],[0.72,0],[0,0.72],[0.72,0.72]].forEach(([dx,dy])=>{c.fillStyle='#b0a890';c.fillRect(x+s*dx,y+s*dy,s*0.28,s*0.28);c.fillStyle='#5a2530';c.beginPath();c.arc(x+s*dx+s*0.14,y+s*dy+s*0.14,s*0.08,0,6.28);c.fill();});roof('#c0b8a0','#7a7060',0.36);break;
+    default: roof('#8a6a42','#5a4a2a',0.18);
+  }
+}
+function selectBuild(type){ const bd=BUILDINGS[type]; if(state.gold<bd.unlock&&!hasUnlocked(type)){notify(`Odblokuj za ${fmt(bd.unlock)}🪙`,true);return;} selectedBuild=(selectedBuild===type)?null:type; axeMode=false; closeInfo(); updateUI(); }
+function openInfo(key){
+  selectedTile=key; const b=state.map[key],bd=BUILDINGS[b.type];
+  document.getElementById('ip-title').textContent=bd.name;
+  const tier=Math.floor((b.level-1)/5); const tierName=['','Złoty ','Mistrzowski ','Królewski ','Legendarny '][Math.min(tier,4)];
+  document.getElementById('ip-lvl').textContent=`${tierName}Poziom ${b.level}`;
+  document.getElementById('ip-desc').textContent=bd.desc;
+  document.getElementById('ip-income').textContent=bd.income*b.level;
+  document.getElementById('ip-pop-stat').innerHTML=bd.pop?`Ludność: <b>+${bd.pop*b.level}</b>`:(bd.food?`Żywność: <b>${bd.food>0?'+':''}${bd.food*b.level}</b>`:'');
+  const up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level));
+  document.getElementById('ip-upgrade').innerHTML=`⬆ Rozbuduj<br><small>${fmt(up)}🪙</small>`;
+  const ic=document.getElementById('ip-icon'); ic.innerHTML='<canvas width="40" height="40"></canvas>'; miniIcon(ic.querySelector('canvas').getContext('2d'),b.type);
+  document.getElementById('info-panel').classList.add('show');
+}
+function closeInfo(){ document.getElementById('info-panel').classList.remove('show'); selectedTile=null; }
+function doUpgrade(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];const up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level));if(state.gold<up){notify('Brakuje grosza!',true);return;}state.gold-=up;b.level++;recalc();notify(`${bd.name} → poziom ${b.level}!`);openInfo(selectedTile);updateUI(); }
+function doDemolish(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];const ref=Math.round(bd.cost*0.4*b.level);state.gold+=ref;delete state.map[selectedTile];recalc();notify(`Zburzono. Odzyskano ${fmt(ref)}🪙`);closeInfo();updateUI(); }
+function fmt(n){ n=Math.round(n); if(n>=1e6)return(n/1e6).toFixed(1)+'mln'; if(n>=1e3)return(n/1e3).toFixed(1)+'tys'; return''+n; }
+let notifT; function notify(msg,err=false){const n=document.getElementById('notif');n.textContent=msg;n.className='show'+(err?' err':'');clearTimeout(notifT);notifT=setTimeout(()=>n.className=err?'err':'',1800);}
+function floatText(x,y,txt,color='#e6c558'){const el=document.createElement('div');el.className='float-text';el.textContent=txt;el.style.left=x+'px';el.style.top=y+'px';el.style.color=color;document.getElementById('canvas-wrap').appendChild(el);setTimeout(()=>el.remove(),1200);}
+function toggleSpeed(){state.speed=state.speed===1?2:state.speed===2?4:1;document.getElementById('speed-btn').textContent=state.speed===1?'⏩':state.speed===2?'⏩⏩':'⏩⏩⏩';clearInterval(gameLoop);gameLoop=setInterval(tick,TICK_MS/state.speed);}
+function centerView(){camX=0;camY=0;zoom=0.6;}
+
+// INPUT
+function setupInput(){
+  const el=canvas;
+  el.addEventListener('pointerdown',e=>{dragging=true;dragMoved=false;camStartX=e.clientX-camX;camStartY=e.clientY-camY;});
+  el.addEventListener('pointermove',e=>{hover=screenToGrid(e.clientX,e.clientY);if(dragging){const nx=e.clientX-camStartX,ny=e.clientY-camStartY;if(Math.abs(nx-camX)>3||Math.abs(ny-camY)>3)dragMoved=true;camX=nx;camY=ny;}});
+  el.addEventListener('pointerup',e=>{dragging=false;if(dragMoved)return;
+    const g=screenToGrid(e.clientX,e.clientY);const key=`${g.gx},${g.gy}`;
+    if(axeMode){ clearForest(g.gx,g.gy); return; }
+    if(selectedBuild){ if(!plotOwned(g.gx,g.gy)){if(tryBuyPlot(g.gx,g.gy))return;} placeBuilding(g.gx,g.gy); }
+    else if(state.map[key]&&fogLevel(g.gx,g.gy)===0){ openInfo(key); }
+    else if(!plotOwned(g.gx,g.gy)){ tryBuyPlot(g.gx,g.gy); }
+    else { closeInfo(); }});
+  el.addEventListener('touchmove',e=>{if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;const d=Math.hypot(dx,dy);if(pinchDist)zoom=Math.max(0.3,Math.min(1.6,zoom*(d/pinchDist)));pinchDist=d;}});
+  el.addEventListener('touchend',()=>pinchDist=0);
+  el.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(0.3,Math.min(1.6,zoom-e.deltaY*0.001));},{passive:false});
+}
+function resize(){dpr=window.devicePixelRatio||1;const wrap=document.getElementById('canvas-wrap');W=wrap.clientWidth;H=wrap.clientHeight;canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);}
+function startGame(){document.getElementById('intro').style.display='none';if(started)return;started=true;gameLoop=setInterval(tick,TICK_MS);notify('Witaj, Książę! Karczuj las po drewno.');}
+function init(){canvas=document.getElementById('game-canvas');ctx=canvas.getContext('2d');resize();window.addEventListener('resize',resize);setupInput();recalc();updateUI();render();}
+init();
+</script>
+</body>
+</html>
