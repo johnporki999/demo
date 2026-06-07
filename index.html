@@ -92,16 +92,16 @@
   .ip-upgrade { background:linear-gradient(160deg,#3a5a2a,#243a18); border-color:var(--green); color:#d4f0c0; }
   .ip-demolish { background:linear-gradient(160deg,#5a2530,#3a1820); border-color:var(--crimson-light); color:var(--parchment); }
   .ip-close { position:absolute; top:10px; right:14px; color:var(--gold); font-size:22px; cursor:pointer; line-height:1; }
-  #intro { position:absolute; inset:0; z-index:100; background:radial-gradient(circle at 50% 40%,#1A1109,#0D0905); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px; }
+  #intro { position:absolute; inset:0; z-index:100; background:radial-gradient(circle at 50% 42%, rgba(14,9,5,0.18) 0%, rgba(14,9,5,0.4) 48%, rgba(13,9,5,0.8) 100%), linear-gradient(to bottom, rgba(13,9,5,0.5) 0%, rgba(13,9,5,0.08) 32%, rgba(13,9,5,0.12) 58%, rgba(13,9,5,0.9) 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px; }
   #intro .brand-logo { font-family:'Cinzel Decorative',serif; font-weight:900; font-size:30px; color:var(--gold); letter-spacing:8px; text-shadow:0 0 20px rgba(200,146,42,0.5); }
   #intro .brand-tag { font-family:'Cinzel',serif; font-size:9px; color:var(--parchment); letter-spacing:5px; margin-bottom:26px; opacity:0.7; }
-  #intro .crest-big { font-size:56px; margin-bottom:6px; filter:drop-shadow(0 0 20px var(--gold)); }
-  #intro h1 { font-family:'Cinzel Decorative',serif; font-weight:900; font-size:38px; color:var(--gold-light); letter-spacing:4px; margin-bottom:2px; text-shadow:0 2px 16px #000; }
-  #intro .h1-sub { font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--crimson-light); letter-spacing:6px; margin-bottom:18px; }
-  #intro .sub { font-style:italic; font-size:15px; color:#c4b48c; margin-bottom:24px; max-width:330px; line-height:1.5; }
-  #intro .start-btn { font-family:'Cinzel'; font-weight:700; font-size:16px; background:linear-gradient(160deg,var(--gold-light),var(--gold)); color:var(--wood-dark); border:none; border-radius:10px; padding:14px 40px; cursor:pointer; letter-spacing:1px; box-shadow:0 4px 16px var(--shadow),inset 0 1px 2px rgba(255,255,255,0.4); margin-bottom:10px; }
+  #intro .crest-big { font-size:56px; margin-bottom:6px; filter:drop-shadow(0 0 20px var(--gold)) drop-shadow(0 2px 10px #000); }
+  #intro h1 { font-family:'Cinzel Decorative',serif; font-weight:900; font-size:38px; color:var(--gold-light); letter-spacing:4px; margin-bottom:2px; text-shadow:0 2px 16px #000,0 0 30px rgba(0,0,0,0.8); }
+  #intro .h1-sub { font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--crimson-light); letter-spacing:6px; margin-bottom:18px; text-shadow:0 2px 10px #000; }
+  #intro .sub { font-style:italic; font-size:15px; color:#d4c49c; margin-bottom:24px; max-width:330px; line-height:1.5; text-shadow:0 2px 10px #000,0 1px 3px #000; }
+  #intro .start-btn { font-family:'Cinzel'; font-weight:700; font-size:16px; background:linear-gradient(160deg,var(--gold-light),var(--gold)); color:var(--wood-dark); border:none; border-radius:10px; padding:14px 40px; cursor:pointer; letter-spacing:1px; box-shadow:0 4px 16px var(--shadow),0 6px 24px rgba(0,0,0,0.6),inset 0 1px 2px rgba(255,255,255,0.4); margin-bottom:10px; }
   #intro .start-btn:active { transform:scale(0.96); }
-  #intro .reset-btn { font-family:'EB Garamond'; font-size:12px; background:none; border:1px solid #6a5a3a; color:#8a7a5a; border-radius:6px; padding:6px 16px; cursor:pointer; }
+  #intro .reset-btn { font-family:'EB Garamond'; font-size:12px; background:rgba(13,9,5,0.5); border:1px solid #6a5a3a; color:#a89878; border-radius:6px; padding:6px 16px; cursor:pointer; }
   #intro .channel { margin-top:20px; font-size:12px; color:#8a7a5a; font-style:italic; }
 
   /* SAMOUCZEK */
@@ -358,7 +358,7 @@
 
 <script>
 // =====================================================================
-//  GRÓD PIASTÓW v6 — +13 nowych budynków (24 łącznie) + chodzący mieszkańcy + bogatsze designy
+//  GRÓD PIASTÓW v7 — pora dnia (świt/dzień/zmierzch/noc) + menu-świat + zawody wieśniaków + wozy/łódki + reakcje na klik
 // =====================================================================
 const TILE=70, PLOT=5, TICK_MS=833, SAVE_KEY='dziedzic_save_v1';
 // Mnożnik tempa dochodu — monety nabijają się x3 szybciej
@@ -545,96 +545,212 @@ function seasonDisplay(){
   if(b>0.5){ const nxt=SEASONS[nextSeasonId()]; return `${cur.icon}→${nxt.icon} ${nxt.name}`; }
   return `${cur.icon} ${cur.name}`;
 }
+
+// =====================================================================
+//  PORA DNIA — wolny cykl dobowy (klimat, nie męczy)
+//  Ten sam wzorzec co pory roku: 4 fazy z płynnym lerpowaniem między nimi.
+// =====================================================================
+// Faza dnia liczona z ułamkowej części miesiąca — pełna doba co DAY_SPAN "miesiąca".
+// DAY_SPAN dobrane tak, by doba trwała ~4× dłużej niż sezon w odczuciu (spokojny rytm).
+const DAY_SPAN=1.0; // 1 "miesiąc" gry = pełna doba (przy YEAR_TICKS=192 to ~13.3 s realne na dobę → spokojnie)
+const DAYTIMES=[
+  // skyRGB = barwa nakładki nieba, a = jej krycie, dark = przyciemnienie sceny (0=brak), light = ile świecą okna (0..1)
+  { id:0, name:'Świt',    icon:'🌅', skyRGB:[255,170,120], a:0.22, dark:0.18, light:0.55 },
+  { id:1, name:'Dzień',   icon:'☀️', skyRGB:[255,250,235], a:0.04, dark:0.00, light:0.00 },
+  { id:2, name:'Zmierzch',icon:'🌇', skyRGB:[255,130,70],  a:0.26, dark:0.22, light:0.70 },
+  { id:3, name:'Noc',     icon:'🌙', skyRGB:[30,40,90],     a:0.46, dark:0.55, light:1.00 },
+];
+// nadpisanie pory dnia (menu = złota godzina). null => normalny cykl z czasu gry.
+let dayPhaseOverride=null;
+function dayPhaseRaw(){ // 0..4 ciągłe (0=świt ... 4=znów świt)
+  if(dayPhaseOverride!=null) return dayPhaseOverride;
+  return ((state.month % DAY_SPAN) / DAY_SPAN) * 4;
+}
+function dayId(){ return Math.floor(dayPhaseRaw()) % 4; }
+function nextDayId(){ return (dayId()+1) % 4; }
+function dayBlend(){ const r=dayPhaseRaw(); const f=r-Math.floor(r); // mieszamy w ostatnich 40% każdej fazy → płynne przenikanie
+  const S=0.6; if(f<S) return 0; return (f-S)/(1-S); }
+// zmieszane wartości bieżącej i następnej fazy
+function dayMix(){
+  const cur=DAYTIMES[dayId()], nxt=DAYTIMES[nextDayId()], b=dayBlend();
+  return {
+    skyRGB:[Math.round(cur.skyRGB[0]+(nxt.skyRGB[0]-cur.skyRGB[0])*b),
+            Math.round(cur.skyRGB[1]+(nxt.skyRGB[1]-cur.skyRGB[1])*b),
+            Math.round(cur.skyRGB[2]+(nxt.skyRGB[2]-cur.skyRGB[2])*b)],
+    a:cur.a*(1-b)+nxt.a*b,
+    dark:cur.dark*(1-b)+nxt.dark*b,
+    light:cur.light*(1-b)+nxt.light*b,
+  };
+}
+function dayDisplay(){ const cur=DAYTIMES[dayId()], b=dayBlend();
+  if(b>0.5){ const nxt=DAYTIMES[nextDayId()]; return nxt.icon; } return cur.icon; }
+// czy noc/świt na tyle ciemne, by świeciły okna
+function nightLight(){ return dayMix().light; }
 // płatki śniegu (stałe pozycje, animowane spadanie)
 let snowflakes=null;
 function initSnow(){ snowflakes=[]; for(let i=0;i<60;i++) snowflakes.push({x:Math.random(),y:Math.random(),sp:0.3+Math.random()*0.5,r:1+Math.random()*2,drift:Math.random()*6.28}); }
+// gwiazdy (do nocnego nieba)
+let stars=null;
+function initStars(){ stars=[]; for(let i=0;i<70;i++) stars.push({x:Math.random(),y:Math.random()*0.6,r:0.5+Math.random()*1.3,tw:Math.random()*6.28}); }
 
 // ---- MIESZKAŃCY (chodzące ludziki) ----
 // Wieśniacy spacerują po wykupionych, niezabudowanych kaflach w pobliżu domostw.
-// Każdy ma pozycję w jednostkach świata (gx,gy ułamkowe) i wędruje do losowego celu.
+// Każdy ma pozycję w jednostkach świata (gx,gy ułamkowe), zawód i kursuje dom↔praca.
 let villagers=[];
-let villagerHomes=[];   // lista kafli, po których mogą chodzić (gx,gy środka kafla)
-let villagerDirty=true; // przelicz listę kafli, gdy mapa się zmieni
-const VILLAGER_PALETTE=[
-  {body:'#7a4a2a',head:'#d8a878'},{body:'#5a6a8a',head:'#d8a878'},{body:'#6a3a3a',head:'#e0b088'},
-  {body:'#4a6a4a',head:'#d0a070'},{body:'#8a7038',head:'#e0b088'},{body:'#5a4a6a',head:'#d8a878'},
-  {body:'#9a9088',head:'#e0b088'},{body:'#3a5a5a',head:'#d0a070'},
-];
+let villagerHomes=[];   // przechodnie kafle koło domostw (gx,gy)
+let workSites=[];       // miejsca pracy: {gx,gy,job} — kafle obok budynków produkcyjnych
+let villagerDirty=true;
+// kolory ubrań wg zawodu
+const JOB_STYLE={
+  rolnik:    {body:'#6a8a3a',head:'#d8a878',hat:'#b8923a'}, // zielono-słomiany
+  kowal:     {body:'#5a4038',head:'#d0a070',hat:'#2a2a2a'}, // ciemny, fartuch
+  mnich:     {body:'#3a2e22',head:'#e0b088',hat:'#2a2018'}, // brązowy habit
+  kupiec:    {body:'#7a3a4a',head:'#e0b088',hat:'#c8a040'}, // bogata czerwień
+  rybak:     {body:'#3a5a6a',head:'#d8a878',hat:'#5a7a8a'}, // morski błękit
+  gornik:    {body:'#4a4038',head:'#d0a070',hat:'#6a5030'}, // ziemisty
+  mieszczanin:{body:'#5a5a7a',head:'#d8a878',hat:'#4a3420'},// zwykły lud
+};
+const JOB_LIST=Object.keys(JOB_STYLE);
+// budynek -> zawód pracownika
+const BUILDING_JOB={ pole:'rolnik', sad:'rolnik', mlyn:'rolnik', piekarnia:'rolnik',
+  kuznia:'kowal', tartak:'kowal', garbarnia:'kowal',
+  klasztor:'mnich', kosciol:'mnich', katedra:'mnich',
+  targ:'kupiec', browar:'kupiec', ratusz:'kupiec', stajnia:'kupiec',
+  port:'rybak', kopalnia:'gornik' };
 function markVillagersDirty(){ villagerDirty=true; }
 function rebuildVillagerHomes(){
-  villagerHomes=[];
-  // kafle, które są wykupione, przechodnie (trawa/karczowane) i sąsiadują z domostwem
+  villagerHomes=[]; workSites=[];
   const livable={chata:1,grod:1,zamek:1,klasztor:1,ratusz:1,kosciol:1,katedra:1,laznia:1};
   const seen={};
-  for(const k in state.map){ if(!livable[state.map[k].type]) continue; const [bx,by]=k.split(',').map(Number);
-    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){ const gx=bx+dx,gy=by+dy; const kk=gx+','+gy; if(seen[kk])continue;
-      if(state.map[kk])continue;                 // nie po budynkach
-      if(!plotOwned(gx,gy))continue;             // tylko wykupiona ziemia
-      const t=getTerrain(gx,gy); if(t.type!=='grass'&&!t.cleared)continue; if(t.type==='water'||t.type==='mountain'||t.type==='forest')continue;
-      seen[kk]=1; villagerHomes.push({gx,gy}); } }
-  // docelowa liczba ludzików: rośnie z populacją, ograniczona liczbą kafli i sufitem
-  const target=Math.max(0, Math.min(villagerHomes.length*3, Math.min(70, Math.floor(state.pop/12))));
-  // dostrój populację wieśniaków
+  for(const k in state.map){ const type=state.map[k].type; const [bx,by]=k.split(',').map(Number);
+    // przechodnie kafle wokół domostw = gdzie ludzie się kręcą
+    if(livable[type]){
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){ const gx=bx+dx,gy=by+dy; const kk=gx+','+gy; if(seen[kk])continue;
+        if(state.map[kk])continue; if(!plotOwned(gx,gy))continue;
+        const t=getTerrain(gx,gy); if(t.type!=='grass'&&!t.cleared)continue;
+        seen[kk]=1; villagerHomes.push({gx,gy}); } }
+    // miejsca pracy = kafel obok budynku produkcyjnego (na lądzie przechodnim)
+    const job=BUILDING_JOB[type];
+    if(job){ let placed=false;
+      for(let dy=-1;dy<=1&&!placed;dy++)for(let dx=-1;dx<=1&&!placed;dx++){ if(!dx&&!dy)continue; const gx=bx+dx,gy=by+dy; if(state.map[gx+','+gy])continue; if(!plotOwned(gx,gy))continue; const t=getTerrain(gx,gy); if(t.type==='water'||t.type==='mountain'||t.type==='forest')continue; workSites.push({gx,gy,job}); placed=true; } }
+  }
+  const target=Math.max(0, Math.min(villagerHomes.length*3, Math.min(80, Math.floor(state.pop/10))));
   if(villagerHomes.length===0){ villagers=[]; villagerDirty=false; return; }
   while(villagers.length>target) villagers.pop();
   while(villagers.length<target){ const h=villagerHomes[Math.floor(Math.random()*villagerHomes.length)];
-    const col=VILLAGER_PALETTE[Math.floor(Math.random()*VILLAGER_PALETTE.length)];
+    // przypisz zawód: jeśli są miejsca pracy, część dostaje pracę, reszta to mieszczanie
+    let job='mieszczanin', work=null;
+    if(workSites.length && Math.random()<0.7){ const w=workSites[Math.floor(Math.random()*workSites.length)]; job=w.job; work=w; }
     villagers.push({ x:h.gx+0.5+(Math.random()-0.5)*0.5, y:h.gy+0.5+(Math.random()-0.5)*0.5,
-      tx:h.gx+0.5, ty:h.gy+0.5, sp:0.18+Math.random()*0.22, col, phase:Math.random()*6.28,
-      pause:Math.random()*2, facing:1 }); }
-  // upewnij się, że cele istniejących wieśniaków są nadal sensowne
-  for(const v of villagers){ if(!v.col) v.col=VILLAGER_PALETTE[0]; }
+      home:{gx:h.gx,gy:h.gy}, work, job,
+      tx:h.gx+0.5, ty:h.gy+0.5, sp:0.16+Math.random()*0.2, phase:Math.random()*6.28,
+      pause:Math.random()*2, facing:1, goingWork:Math.random()<0.5 }); }
+  // odśwież zawody/cele istniejących, gdy zmieniła się mapa
+  for(const v of villagers){ if(!v.job) v.job='mieszczanin'; if(!JOB_STYLE[v.job]) v.job='mieszczanin'; }
   villagerDirty=false;
+  rebuildTraffic();
 }
+function randHome(){ return villagerHomes.length?villagerHomes[Math.floor(Math.random()*villagerHomes.length)]:null; }
 function pickVillagerTarget(v){
   if(villagerHomes.length===0) return;
-  // wybierz pobliski kafel-cel (preferuj blisko aktualnej pozycji)
+  // pracujący kursują dom <-> praca; reszta dryfuje po pobliskich kaflach
+  if(v.work){
+    if(v.goingWork){ v.tx=v.work.gx+0.4+Math.random()*0.2; v.ty=v.work.gy+0.4+Math.random()*0.2; }
+    else { v.tx=v.home.gx+0.4+Math.random()*0.2; v.ty=v.home.gy+0.4+Math.random()*0.2; }
+    v.goingWork=!v.goingWork; return;
+  }
   let best=null,bestD=1e9;
-  for(let i=0;i<5;i++){ const h=villagerHomes[Math.floor(Math.random()*villagerHomes.length)];
-    const d=Math.abs(h.gx+0.5-v.x)+Math.abs(h.gy+0.5-v.y); if(d<bestD){bestD=d;best=h;} }
+  for(let i=0;i<5;i++){ const h=randHome(); if(!h)break; const d=Math.abs(h.gx+0.5-v.x)+Math.abs(h.gy+0.5-v.y); if(d<bestD){bestD=d;best=h;} }
   if(best){ v.tx=best.gx+0.4+Math.random()*0.2; v.ty=best.gy+0.4+Math.random()*0.2; }
 }
 function updateVillagers(dt){
   if(villagerDirty) rebuildVillagerHomes();
-  for(const v of villagers){
+  // w nocy część wieśniaków "śpi" — chowamy ich (mniej ruchu na zewnątrz)
+  const lt=nightLight(); // 0 w dzień ... 1 w nocy
+  const awakeFrac=1-lt*0.65; // nocą ~35% zostaje na zewnątrz
+  const awakeN=Math.ceil(villagers.length*awakeFrac);
+  for(let i=0;i<villagers.length;i++){ const v=villagers[i]; v.asleep=(i>=awakeN);
+    if(v.asleep){ continue; }
     if(v.pause>0){ v.pause-=dt; continue; }
     const ddx=v.tx-v.x, ddy=v.ty-v.y; const dist=Math.hypot(ddx,ddy);
-    if(dist<0.05){ // dotarł — krótka pauza i nowy cel
-      v.pause=0.4+Math.random()*2.2; pickVillagerTarget(v);
-    } else {
-      const step=v.sp*dt; v.x+=ddx/dist*step; v.y+=ddy/dist*step;
-      if(Math.abs(ddx)>0.01) v.facing=ddx>0?1:-1;
-    }
+    if(dist<0.05){ v.pause=0.4+Math.random()*2.0; pickVillagerTarget(v); }
+    else { const step=v.sp*dt; v.x+=ddx/dist*step; v.y+=ddy/dist*step; if(Math.abs(ddx)>0.01) v.facing=ddx>0?1:-1; }
   }
 }
 function drawVillagers(){
-  if(zoom<0.45) return; // przy mocnym oddaleniu nie rysuj (czytelność + wydajność)
+  if(zoom<0.45) return;
   const T=Date.now()/1000;
   for(const v of villagers){
-    const sc=gridToScreen(v.x,v.y); 
-    if(sc.x<-20||sc.x>W+20||sc.y<-20||sc.y>H+20) continue; // poza ekranem
+    if(v.asleep) continue; // śpiący nie są rysowani (są "w domu")
+    const sc=gridToScreen(v.x,v.y);
+    if(sc.x<-20||sc.x>W+20||sc.y<-20||sc.y>H+20) continue;
     const moving=v.pause<=0;
-    const sz=Math.max(3.2, 7*zoom); // rozmiar ludzika
+    const sz=Math.max(3.2, 7*zoom);
     const bob=moving?Math.sin(T*7+v.phase)*sz*0.12:0;
     const px=sc.x, py=sc.y-bob;
+    const st=JOB_STYLE[v.job]||JOB_STYLE.mieszczanin;
     // cień
     ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(px,sc.y+sz*0.6,sz*0.5,sz*0.2,0,0,6.28); ctx.fill();
-    // nogi (animacja kroku)
+    // nogi
     const legSwing=moving?Math.sin(T*9+v.phase)*sz*0.35:0;
     ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=Math.max(1,sz*0.18); ctx.lineCap='round';
     ctx.beginPath(); ctx.moveTo(px,py+sz*0.2); ctx.lineTo(px-legSwing,py+sz*0.6); ctx.moveTo(px,py+sz*0.2); ctx.lineTo(px+legSwing,py+sz*0.6); ctx.stroke();
     // tułów
-    ctx.fillStyle=v.col.body; ctx.beginPath(); ctx.moveTo(px-sz*0.32,py+sz*0.25); ctx.lineTo(px+sz*0.32,py+sz*0.25); ctx.lineTo(px+sz*0.2,py-sz*0.3); ctx.lineTo(px-sz*0.2,py-sz*0.3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=st.body; ctx.beginPath(); ctx.moveTo(px-sz*0.32,py+sz*0.25); ctx.lineTo(px+sz*0.32,py+sz*0.25); ctx.lineTo(px+sz*0.2,py-sz*0.3); ctx.lineTo(px-sz*0.2,py-sz*0.3); ctx.closePath(); ctx.fill();
     // ramiona
     const armSwing=moving?Math.sin(T*9+v.phase+3.14)*sz*0.3:sz*0.05;
-    ctx.strokeStyle=v.col.body; ctx.lineWidth=Math.max(1,sz*0.16);
+    ctx.strokeStyle=st.body; ctx.lineWidth=Math.max(1,sz*0.16);
     ctx.beginPath(); ctx.moveTo(px-sz*0.22,py-sz*0.18); ctx.lineTo(px-sz*0.34+armSwing,py+sz*0.18); ctx.moveTo(px+sz*0.22,py-sz*0.18); ctx.lineTo(px+sz*0.34-armSwing,py+sz*0.18); ctx.stroke();
     // głowa
-    ctx.fillStyle=v.col.head; ctx.beginPath(); ctx.arc(px,py-sz*0.45,sz*0.3,0,6.28); ctx.fill();
-    // czapka/włosy
-    ctx.fillStyle='#4a3420'; ctx.beginPath(); ctx.arc(px,py-sz*0.52,sz*0.3,Math.PI*1.05,Math.PI*1.95); ctx.fill();
+    ctx.fillStyle=st.head; ctx.beginPath(); ctx.arc(px,py-sz*0.45,sz*0.3,0,6.28); ctx.fill();
+    // nakrycie głowy wg zawodu
+    ctx.fillStyle=st.hat; ctx.beginPath(); ctx.arc(px,py-sz*0.52,sz*0.3,Math.PI*1.05,Math.PI*1.95); ctx.fill();
+    if(v.job==='mnich'){ // kaptur dłuższy
+      ctx.fillStyle=st.hat; ctx.beginPath(); ctx.arc(px,py-sz*0.42,sz*0.34,Math.PI*0.95,Math.PI*2.05); ctx.fill(); }
   }
   ctx.lineCap='butt';
+}
+function findVillagerAt(wx,wy){ // do reakcji na klik: najbliższy wieśniak w promieniu
+  let best=null,bd=0.6;
+  for(const v of villagers){ if(v.asleep)continue; const d=Math.hypot(v.x-wx,v.y-wy); if(d<bd){bd=d;best=v;} }
+  return best;
+}
+
+// ---- WOZY i ŁÓDKI (ruch poza pieszymi) ----
+let carts=[];  // wozy kursujące między targowiskami/portami/grodami po lądzie
+let boats=[];  // łódki dryfujące po wodzie
+function rebuildTraffic(){
+  carts=[]; boats=[];
+  // wozy: trasy między "węzłami handlu"
+  const hubs=[];
+  for(const k in state.map){ const tp=state.map[k].type; if(tp==='targ'||tp==='port'||tp==='grod'||tp==='ratusz'||tp==='zamek'){ const [gx,gy]=k.split(',').map(Number); hubs.push({gx,gy}); } }
+  if(hubs.length>=2){ const n=Math.min(6,hubs.length); for(let i=0;i<n;i++){ const a=hubs[i%hubs.length], b=hubs[(i+1)%hubs.length]; if(a===b)continue;
+    carts.push({ax:a.gx+0.5,ay:a.gy+0.5,bx:b.gx+0.5,by:b.gy+0.5,t:Math.random(),sp:0.04+Math.random()*0.04,dir:1}); } }
+  // łódki: wokół portów, dryf po pobliskiej wodzie
+  for(const k in state.map){ if(state.map[k].type!=='port')continue; const [gx,gy]=k.split(',').map(Number);
+    for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){ const t=getTerrain(gx+dx,gy+dy); if(t.type==='water'&&Math.random()<0.25){ boats.push({x:gx+dx+0.5,y:gy+dy+0.5,ox:gx+dx+0.5,oy:gy+dy+0.5,ph:Math.random()*6.28,sp:0.2+Math.random()*0.3}); if(boats.length>10)break; } } }
+}
+function updateTraffic(dt){
+  for(const c of carts){ c.t+=c.sp*dt*c.dir; if(c.t>=1){c.t=1;c.dir=-1;} else if(c.t<=0){c.t=0;c.dir=1;} }
+}
+function drawTraffic(){
+  if(zoom<0.4) return;
+  const T=Date.now()/1000;
+  // łódki (rysujemy pod budynkami nie trzeba — woda jest niżej; rysujemy tu nad terenem)
+  for(const bt of boats){ const bx=bt.ox+Math.sin(T*0.3+bt.ph)*0.4, by=bt.oy+Math.cos(T*0.25+bt.ph)*0.3; const sc=gridToScreen(bx,by); if(sc.x<-20||sc.x>W+20||sc.y<-20||sc.y>H+20)continue; const s=TILE*zoom;
+    ctx.fillStyle='#6b4a28'; ctx.beginPath(); ctx.moveTo(sc.x-s*0.12,sc.y); ctx.lineTo(sc.x+s*0.12,sc.y); ctx.lineTo(sc.x+s*0.08,sc.y+s*0.06); ctx.lineTo(sc.x-s*0.08,sc.y+s*0.06); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#3a2a18'; ctx.lineWidth=1.5*zoom; ctx.beginPath(); ctx.moveTo(sc.x,sc.y); ctx.lineTo(sc.x,sc.y-s*0.14); ctx.stroke();
+    ctx.fillStyle='rgba(240,235,220,0.9)'; ctx.beginPath(); ctx.moveTo(sc.x,sc.y-s*0.13); ctx.lineTo(sc.x,sc.y-s*0.02); ctx.lineTo(sc.x+s*0.09,sc.y-s*0.07); ctx.closePath(); ctx.fill(); }
+  // wozy
+  for(const c of carts){ const x=c.ax+(c.bx-c.ax)*c.t, y=c.ay+(c.by-c.ay)*c.t; const sc=gridToScreen(x,y); if(sc.x<-20||sc.x>W+20||sc.y<-20||sc.y>H+20)continue; const s=TILE*zoom; const bob=Math.sin(T*8+c.t*20)*s*0.02;
+    // cień
+    ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.beginPath(); ctx.ellipse(sc.x,sc.y+s*0.1,s*0.14,s*0.05,0,0,6.28); ctx.fill();
+    // koło/skrzynia wozu
+    ctx.fillStyle='#6a4a28'; ctx.fillRect(sc.x-s*0.1,sc.y-s*0.08+bob,s*0.2,s*0.12);
+    ctx.fillStyle='#8a6a3a'; ctx.fillRect(sc.x-s*0.1,sc.y-s*0.1+bob,s*0.2,s*0.04);
+    ctx.fillStyle='#2a1a0e'; ctx.beginPath(); ctx.arc(sc.x-s*0.06,sc.y+s*0.06+bob,s*0.035,0,6.28); ctx.arc(sc.x+s*0.06,sc.y+s*0.06+bob,s*0.035,0,6.28); ctx.fill();
+    // konik z przodu (kierunek wg dir)
+    const fx=sc.x+(c.dir>0?1:-1)*s*0.16; ctx.fillStyle='#5a3a1e'; ctx.beginPath(); ctx.ellipse(fx,sc.y-s*0.02+bob,s*0.06,s*0.04,0,0,6.28); ctx.fill(); }
 }
 
 // ---- ŁAŃCUCHY PRODUKCJI (premia za sąsiedztwo) ----
@@ -895,10 +1011,41 @@ function drawTreeTop(cx,cy,r,sid){
 function drawBuilding(gx,gy,b){
   const {x,y}=gridToScreen(gx,gy); const s=TILE*zoom; const cx=x+s/2,cy=y+s/2;
   ctx.save(); buildingArt(b.type,x,y,s);
+  // NOCNE OKNA — ciepły blask, gdy zmierzch/noc (intensywność z nightLight)
+  const lt=nightLight();
+  if(lt>0.05 && WINDOW_SPOTS[b.type]){
+    const flick=0.85+Math.sin(Date.now()/300+gx*7+gy*3)*0.15;
+    ctx.save(); ctx.shadowColor='rgba(255,190,90,0.9)'; ctx.shadowBlur=4*zoom*lt;
+    for(const w of WINDOW_SPOTS[b.type]){
+      ctx.fillStyle=`rgba(255,${180+40*flick|0},${90*flick|0},${0.85*lt*flick})`;
+      ctx.fillRect(x+s*w[0], y+s*w[1], s*w[2], s*w[3]);
+    }
+    ctx.restore();
+  }
   const tier=Math.floor((b.level-1)/5), inTier=((b.level-1)%5)+1;
   if(b.level>1){ const col=STAR_TIERS[Math.min(tier,STAR_TIERS.length-1)]; ctx.fillStyle=col; ctx.font=`${10*zoom}px serif`; ctx.textAlign='center'; ctx.shadowColor='#000'; ctx.shadowBlur=2; ctx.fillText('★'.repeat(inTier),cx,y+s-3*zoom); ctx.shadowBlur=0; }
   ctx.restore();
 }
+// pozycje okien [x%, y%, w%, h%] względem kafla — które budynki świecą nocą
+const WINDOW_SPOTS={
+  chata:[[0.3,0.6,0.08,0.1],[0.62,0.6,0.08,0.1]],
+  kuznia:[[0.3,0.55,0.1,0.12]],
+  kosciol:[[0.34,0.5,0.06,0.14],[0.6,0.5,0.06,0.14]],
+  katedra:[[0.3,0.5,0.07,0.16],[0.63,0.5,0.07,0.16]],
+  klasztor:[[0.34,0.5,0.07,0.1],[0.59,0.5,0.07,0.1]],
+  grod:[[0.42,0.5,0.08,0.1],[0.42,0.66,0.08,0.1]],
+  zamek:[[0.3,0.5,0.06,0.1],[0.64,0.5,0.06,0.1],[0.47,0.55,0.06,0.1]],
+  ratusz:[[0.26,0.55,0.07,0.1],[0.45,0.55,0.07,0.1],[0.64,0.55,0.07,0.1]],
+  wieza:[[0.46,0.45,0.08,0.12]],
+  browar:[[0.26,0.5,0.08,0.1]],
+  piekarnia:[[0.28,0.55,0.08,0.1]],
+  laznia:[[0.24,0.52,0.08,0.08],[0.68,0.52,0.08,0.08]],
+  stajnia:[[0.5,0.55,0.08,0.1]],
+  targ:[[0.3,0.4,0.06,0.06],[0.6,0.4,0.06,0.06]],
+  mlyn:[[0.42,0.6,0.08,0.1]],
+  port:[[0.3,0.65,0.06,0.06]],
+  ratusz2:null,
+};
 function buildingArt(type,x,y,s){
   const cx=x+s/2,cy=y+s/2,pad=s*0.12;
   const T=Date.now()/1000;
@@ -1144,537 +1291,4 @@ function buildingArt(type,x,y,s){
         ctx.fillStyle='#8B1A1A'; ctx.beginPath(); ctx.moveTo(x+s*dx-s*0.01,y+s*0.16); ctx.lineTo(x+s*dx+s*0.08,y-s*0.04); ctx.lineTo(x+s*dx+s*0.17,y+s*0.16); ctx.closePath(); ctx.fill();
         ctx.fillStyle='#6a1414'; ctx.beginPath(); ctx.moveTo(x+s*dx+s*0.08,y-s*0.04); ctx.lineTo(x+s*dx+s*0.17,y+s*0.16); ctx.lineTo(x+s*dx+s*0.08,y+s*0.16); ctx.fill(); });
       const rg=0.6+Math.sin(T*1.5)*0.3; ctx.fillStyle=`rgba(120,160,210,${rg})`; ctx.beginPath(); ctx.arc(cx,y+s*0.46,s*0.08,0,6.28); ctx.fill();
-      ctx.strokeStyle='#9a8a4a'; ctx.lineWidth=1.5*zoom; ctx.beginPath(); ctx.arc(cx,y+s*0.46,s*0.08,0,6.28); ctx.stroke();
-      for(let i=0;i<6;i++){ ctx.beginPath(); ctx.moveTo(cx,y+s*0.46); ctx.lineTo(cx+Math.cos(i*1.047)*s*0.08,y+s*0.46+Math.sin(i*1.047)*s*0.08); ctx.stroke(); }
-      ctx.fillStyle='#4a2e18'; ctx.beginPath(); ctx.moveTo(cx-s*0.1,y+s*0.84); ctx.lineTo(cx-s*0.1,y+s*0.64); ctx.arc(cx,y+s*0.64,s*0.1,Math.PI,0); ctx.lineTo(cx+s*0.1,y+s*0.84); ctx.fill();
-      ctx.strokeStyle='#E3B450'; ctx.lineWidth=2*zoom; ctx.shadowColor='#E3B450'; ctx.shadowBlur=4; ctx.beginPath(); ctx.moveTo(cx,y+s*0.26); ctx.lineTo(cx,y+s*0.16); ctx.moveTo(cx-s*0.03,y+s*0.2); ctx.lineTo(cx+s*0.03,y+s*0.2); ctx.stroke(); ctx.shadowBlur=0;
-      break; }
-    default: roof('#8a6a42','#5a4a2a',0.18);
-  }
-}
-function drawFlag(cx,cy,T){ const s=TILE*zoom; const w=Math.sin((T||0)*3)*s*0.02;
-  ctx.strokeStyle='#2a1a0a'; ctx.lineWidth=1.5*zoom; ctx.beginPath(); ctx.moveTo(cx,cy-s*0.14); ctx.lineTo(cx,cy+s*0.06); ctx.stroke();
-  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(cx,cy-s*0.14); ctx.lineTo(cx+s*0.16+w,cy-s*0.12); ctx.lineTo(cx+s*0.16+w,cy-s*0.085); ctx.lineTo(cx,cy-s*0.075); ctx.fill();
-  ctx.fillStyle='#d11'; ctx.beginPath(); ctx.moveTo(cx,cy-s*0.075); ctx.lineTo(cx+s*0.16+w,cy-s*0.085); ctx.lineTo(cx+s*0.16+w,cy-s*0.05); ctx.lineTo(cx,cy-s*0.01); ctx.fill();
-}
-function shade(hex,amt){ let c=hex.replace('#',''); if(c.length===3)c=c.split('').map(x=>x+x).join(''); let r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16); r=Math.max(0,Math.min(255,r+r*amt)); g=Math.max(0,Math.min(255,g+g*amt)); b=Math.max(0,Math.min(255,b+b*amt)); return `rgb(${r|0},${g|0},${b|0})`; }
-function drawPlotMarkers(){
-  const tl=screenToGrid(0,0), br=screenToGrid(W,H);
-  const p0x=Math.floor(tl.gx/PLOT)-1,p1x=Math.floor(br.gx/PLOT)+1,p0y=Math.floor(tl.gy/PLOT)-1,p1y=Math.floor(br.gy/PLOT)+1;
-  for(let py=p0y;py<=p1y;py++)for(let px=p0x;px<=p1x;px++){
-    if(state.ownedPlots[`${px},${py}`])continue;
-    const adj=state.ownedPlots[`${px-1},${py}`]||state.ownedPlots[`${px+1},${py}`]||state.ownedPlots[`${px},${py-1}`]||state.ownedPlots[`${px},${py+1}`];
-    if(!adj)continue;
-    const {x,y}=gridToScreen(px*PLOT,py*PLOT); const s=TILE*zoom*PLOT; const cx=x+s/2,cy=y+s/2;
-    ctx.strokeStyle='#e6c558'; ctx.lineWidth=3*zoom; ctx.setLineDash([10*zoom,6*zoom]); ctx.strokeRect(x+4,y+4,s-8,s-8); ctx.setLineDash([]);
-    ctx.fillStyle='rgba(20,12,6,0.8)'; const bw=s*0.62,bh=36*zoom; ctx.fillRect(cx-bw/2,cy-bh/2,bw,bh); ctx.strokeStyle='#c9a227'; ctx.lineWidth=2*zoom; ctx.strokeRect(cx-bw/2,cy-bh/2,bw,bh);
-    ctx.fillStyle='#e6c558'; ctx.textAlign='center'; ctx.font=`bold ${13*zoom}px Cinzel,serif`; ctx.fillText('🪙 KUP ZIEMIĘ',cx,cy-2*zoom); ctx.font=`${12*zoom}px Cinzel,serif`; ctx.fillText(fmt(plotCost())+' 🪙',cx,cy+14*zoom); ctx.textAlign='start';
-  }
-}
-function render(){
-  const _now=Date.now(); const dt=Math.min(0.05,(_now-(render._last||_now))/1000); render._last=_now;
-  updateVillagers(dt);
-  ctx.clearRect(0,0,W,H); ctx.fillStyle='#0e0a12'; ctx.fillRect(0,0,W,H);
-  const tl=screenToGrid(-1,-1), br=screenToGrid(W+1,H+1);
-  for(let gy=tl.gy;gy<=br.gy;gy++)for(let gx=tl.gx;gx<=br.gx;gx++){ drawTerrainTile(gx,gy); const b=state.map[`${gx},${gy}`]; if(b&&fogLevel(gx,gy)===0){ drawBuilding(gx,gy,b); if(hasSynergy(gx,gy,b.type)){ const {x,y}=gridToScreen(gx,gy); const s=TILE*zoom; ctx.strokeStyle='#C8922A'; ctx.lineWidth=2*zoom; ctx.setLineDash([4*zoom,3*zoom]); ctx.strokeRect(x+1,y+1,s-2,s-2); ctx.setLineDash([]); ctx.fillStyle='#C8922A'; ctx.font=`${11*zoom}px serif`; ctx.textAlign='center'; ctx.fillText('🔗',x+s-8*zoom,y+10*zoom); ctx.textAlign='start'; } } }
-  drawVillagers();
-  drawPlotMarkers();
-  if(selectedBuild && pendingTiles.length){ for(const p of pendingTiles){ if(fogLevel(p.gx,p.gy)!==0) continue; const {x,y}=gridToScreen(p.gx,p.gy); const s=TILE*zoom;
-    ctx.globalAlpha=0.55; buildingArt(selectedBuild,x,y,s); ctx.globalAlpha=1;
-    ctx.strokeStyle='#E3B450'; ctx.lineWidth=2.5*zoom; ctx.setLineDash([5*zoom,3*zoom]); ctx.strokeRect(x+1,y+1,s-2,s-2); ctx.setLineDash([]); } }
-  if(hover&&(selectedBuild||axeMode)){ const {x,y}=gridToScreen(hover.gx,hover.gy); const s=TILE*zoom; let ok=axeMode?canClear(hover.gx,hover.gy):canPlace(hover.gx,hover.gy); ctx.fillStyle=ok?(axeMode?'rgba(90,107,42,0.45)':'rgba(200,146,42,0.35)'):'rgba(139,26,26,0.4)'; ctx.fillRect(x,y,s,s); ctx.strokeStyle=ok?'#E3B450':'#B33030'; ctx.lineWidth=2*zoom; ctx.strokeRect(x,y,s,s); }
-  // nakładka koloru sezonu — płynnie zmieszana z następnym sezonem
-  const cur=SEASONS[seasonId()], nxt=SEASONS[nextSeasonId()], b=seasonBlend();
-  const tintRGB=lerpRGB(cur.tintRGB,nxt.tintRGB,b);
-  const tintA=cur.tintA*(1-b)+nxt.tintA*b;
-  ctx.fillStyle=`rgba(${tintRGB[0]},${tintRGB[1]},${tintRGB[2]},${tintA})`; ctx.fillRect(0,0,W,H);
-  // PADAJĄCY ŚNIEG — gęstość płynnie rośnie/maleje z winterFactor()
-  const wf=winterFactor();
-  if(wf>0.02){
-    if(!snowflakes) initSnow();
-    const T=Date.now()/1000;
-    const count=Math.floor(snowflakes.length*wf);
-    ctx.fillStyle=`rgba(255,255,255,${0.85*wf})`;
-    for(let i=0;i<count;i++){ const f=snowflakes[i];
-      const px=(f.x*W + Math.sin(T*0.5+f.drift)*20)%W;
-      const py=(f.y*H + T*f.sp*60)%H;
-      ctx.beginPath(); ctx.arc(px,py,f.r,0,6.28); ctx.fill();
-    }
-  }
-  requestAnimationFrame(render);
-}
-
-// =====================================================================
-//  ACTIONS
-// =====================================================================
-function canClear(gx,gy){ if(!plotOwned(gx,gy))return false; const t=getTerrain(gx,gy); return t.type==='forest'&&!state.map[`${gx},${gy}`]; }
-function clearForest(gx,gy){ if(!canClear(gx,gy)){ notify('Tu nie ma lasu!',true); SFX.error(); return; } const w=20; state.cleared[`${gx},${gy}`]=true; delete terrainCache[`${gx},${gy}`]; state.wood+=w; state.stats.cleared++; markVillagersDirty(); notify(`Las wykarczowany! +${w}🪵`); SFX.chop(); vibrate(50); checkAchievements(); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`+${w}🪵`,'#a0d060'); updateUI(); autoSave(); }
-function canPlace(gx,gy){ if(!plotOwned(gx,gy))return false; const t=getTerrain(gx,gy); const bd=BUILDINGS[selectedBuild]; if(!bd)return false; if(state.map[`${gx},${gy}`])return false; if(bd.needsWater)return t.type==='water'; if(bd.needsMountain)return t.type==='mountain'; if(t.type==='water'||t.type==='mountain')return false; if(t.type==='forest')return false; return true; }
-function placeBuilding(gx,gy){
-  const bd=BUILDINGS[selectedBuild];
-  if(!plotOwned(gx,gy)){ notify('Najpierw wykup ziemię!',true); return; }
-  const t=getTerrain(gx,gy);
-  if(t.type==='forest'){ notify('Najpierw wykarczuj las! 🪓',true); return; }
-  if(!canPlace(gx,gy)){ if(bd.needsWater)notify('Port buduj na wodzie! 🌊',true); else if(bd.needsMountain)notify('Kopalnię buduj w górach! ⛰️',true); else notify('Nie można tu budować!',true); return; }
-  if(state.gold<bd.cost){ notify(`Brakuje grosza! (${bd.cost}🪙)`,true); SFX.error(); return; }
-  const woodCost=hasTech('ciesielstwo')?Math.ceil(bd.wood*0.75):bd.wood;
-  if(state.wood<woodCost){ notify(`Brakuje drewna! (${woodCost}🪵)`,true); SFX.error(); return; }
-  state.gold-=bd.cost; state.wood-=woodCost; state.map[`${gx},${gy}`]={type:selectedBuild,level:1}; state.stats.built++;
-  recalc(); SFX.build(); vibrate(40); checkAchievements(); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`-${bd.cost}🪙`,'#b33a4a'); updateUI();
-}
-function totalPendingCost(){
-  const bd=BUILDINGS[selectedBuild]; if(!bd) return {gold:0,wood:0,n:0};
-  const woodEach=hasTech('ciesielstwo')?Math.ceil(bd.wood*0.75):bd.wood;
-  return { gold:bd.cost*pendingTiles.length, wood:woodEach*pendingTiles.length, n:pendingTiles.length };
-}
-function confirmPlacement(){
-  if(!selectedBuild||!pendingTiles.length) return;
-  const c=totalPendingCost();
-  if(state.gold<c.gold){ notify(`Brakuje grosza! Potrzeba ${fmt(c.gold)}🪙`,true); SFX.error(); return; }
-  if(state.wood<c.wood){ notify(`Brakuje drewna! Potrzeba ${c.wood}🪵`,true); SFX.error(); return; }
-  const bd=BUILDINGS[selectedBuild]; let built=0;
-  for(const p of pendingTiles){ if(canPlace(p.gx,p.gy)){ placeBuilding(p.gx,p.gy); built++; } }
-  notify(`Wzniesiono ${built}× ${bd.name}!`);
-  pendingTiles=[]; updatePlaceBar(); autoSave();
-}
-function cancelPlacement(){ pendingTiles=[]; selectedBuild=null; updatePlaceBar(); updateUI(); SFX.click(); }
-function updatePlaceBar(){
-  const bar=document.getElementById('place-bar');
-  if(selectedBuild && pendingTiles.length>0){
-    const c=totalPendingCost(); const bd=BUILDINGS[selectedBuild];
-    const enough=state.gold>=c.gold && state.wood>=c.wood;
-    document.getElementById('place-info').innerHTML=`${bd.name} ×${c.n}<br><span style="font-size:11px;color:${enough?'#E3B450':'#e06a6a'}">${fmt(c.gold)}🪙 ${c.wood}🪵</span>`;
-    bar.classList.add('show');
-  } else bar.classList.remove('show');
-}
-function tryBuyPlot(gx,gy){
-  const px=Math.floor(gx/PLOT),py=Math.floor(gy/PLOT),key=`${px},${py}`;
-  if(state.ownedPlots[key])return false;
-  const adj=state.ownedPlots[`${px-1},${py}`]||state.ownedPlots[`${px+1},${py}`]||state.ownedPlots[`${px},${py-1}`]||state.ownedPlots[`${px},${py+1}`];
-  if(!adj){ notify('Kupuj tylko ziemię obok swojej!',true); return true; }
-  const cost=plotCost();
-  if(state.gold<cost){ notify(`Brakuje grosza (${fmt(cost)}🪙)`,true); return true; }
-  state.gold-=cost; state.ownedPlots[key]=true; state.plotsBought++; state.stats.plotsBought++; markVillagersDirty(); notify('Nowa kraina odkryta! 🗺️'); SFX.land(); vibrate(60); checkAchievements();
-  const sc=gridToScreen(px*PLOT+PLOT/2,py*PLOT+PLOT/2); floatText(sc.x,sc.y,`-${fmt(cost)}🪙`,'#b33a4a'); updateUI(); autoSave(); return true;
-}
-
-// =====================================================================
-//  ECONOMY
-// =====================================================================
-function recalc(){ let pop=0,food=0; for(const k in state.map){const b=state.map[k],bd=BUILDINGS[b.type];pop+=bd.pop*b.level; let f=bd.food*b.level; if(b.type==='pole'&&hasTech('plodozmian'))f*=1.5; if(b.type==='klasztor'&&hasTech('sady')&&f>0)f*=1.5; food+=f;}
-  food=food*seasonFoodMult(); state.pop=pop; state.food=Math.round(food);
-  if(pop>state.stats.peakPop)state.stats.peakPop=pop; markVillagersDirty(); }
-function buildingIncome(type,level,gx,gy){
-  const bd=BUILDINGS[type]; let inc=bd.income*level;
-  if(type==='mlyn'&&hasTech('mlynarstwo')) inc*=1.5;
-  if(type==='kuznia'&&hasTech('kowalstwo')) inc*=1.6;
-  if((type==='targ'||type==='port')&&hasTech('handel')) inc*=1.5;
-  if(type==='pole'&&hasTech('nawadnianie')) inc*=1.5;
-  if(type==='kopalnia'&&hasTech('gornictwo')) inc*=1.8;
-  if(hasTech('cechy')) inc*=1.2;
-  if(gx!==undefined) inc*=synergyMult(gx,gy,type);
-  return inc;
-}
-function incomePerYear(){ let inc=0; for(const k in state.map){const b=state.map[k];const [gx,gy]=k.split(',').map(Number);inc+=buildingIncome(b.type,b.level,gx,gy);}
-  let popBonus=state.pop*1; if(hasTech('prawo')) popBonus*=1.3; inc+=popBonus;
-  inc*=seasonIncomeMult();
-  if(state.food<0)inc*=0.4;
-  inc*=INCOME_SPEED; // monety nabijają się x3 szybciej
-  return Math.round(inc); }
-function woodPerYear(){ let w=0; for(const k in state.map){const b=state.map[k];if(b.type==='klasztor'||b.type==='grod')w+=2*b.level;} return w; }
-function knowPerYear(){ let kn=0; for(const k in state.map){const b=state.map[k];if(b.type==='kosciol')kn+=1*b.level;if(b.type==='klasztor')kn+=3*b.level;} if(hasTech('pismo'))kn*=1.5; if(hasTech('uniwersytet'))kn*=2; return Math.round(kn); }
-let tickCount=0;
-function tick(){
-  if(pendingEvent) return;
-  // rok = YEAR_TICKS ticków; co tick przesuwa się 12/YEAR_TICKS "miesiąca"
-  state.month += 12/YEAR_TICKS;
-  const newYear = state.month>=12;
-  if(newYear){ state.month-=12; state.year++; }
-  // dochód roczny rozłożony równo na cały rok (incomePerYear już zawiera mnożnik x3)
-  state.gold += incomePerYear()/YEAR_TICKS;
-  state.wood += woodPerYear()*4/YEAR_TICKS;
-  state.know += knowPerYear()*4/YEAR_TICKS;
-  state.gold=Math.round(state.gold*100)/100; state.wood=Math.round(state.wood); state.know=Math.round(state.know);
-  if(state.gold>state.stats.peakGold)state.stats.peakGold=state.gold;
-  recalc();
-  const keys=Object.keys(state.map);
-  if(keys.length && tickCount%2===0){const rk=keys[Math.floor(Math.random()*keys.length)];const [gx,gy]=rk.split(',').map(Number);if(fogLevel(gx,gy)===0){const sc=gridToScreen(gx,gy);const b=state.map[rk];floatText(sc.x+TILE*zoom/2,sc.y,`+${(buildingIncome(b.type,b.level,gx,gy)*INCOME_SPEED/YEAR_TICKS).toFixed(1)}🪙`);}}
-  if(state.food<0&&Math.random()<0.3) notify('⚠ Głód! Zbuduj pola.',true);
-  if(keys.length>0 && tickCount%3===0) SFX.coin();
-  if(newYear){ maybeRaid(); if(!pendingEvent) maybeEvent(); }
-  checkAchievements();
-  updateUI();
-  if(++tickCount%4===0) saveGame(false);
-}
-
-// =====================================================================
-//  UI
-// =====================================================================
-let displayGold=null;
-function animateCounters(){
-  if(displayGold===null) displayGold=state.gold;
-  const diff=state.gold-displayGold;
-  if(Math.abs(diff)>0.5){ displayGold+=diff*0.15; document.getElementById('r-gold').textContent=fmt(Math.round(displayGold)); }
-  else { displayGold=state.gold; }
-  requestAnimationFrame(animateCounters);
-}
-function updateUI(){
-  document.getElementById('r-gold').textContent=fmt(Math.round(displayGold!==null?displayGold:state.gold));
-  document.getElementById('r-gold-rate').textContent=`+${fmt(incomePerYear())}/rok`;
-  document.getElementById('r-wood').textContent=fmt(state.wood);
-  document.getElementById('r-know').textContent=fmt(state.know);
-  document.getElementById('r-pop').textContent=fmt(state.pop);
-  const fe=document.getElementById('r-food'); fe.textContent=(state.food>=0?'+':'')+fmt(state.food); fe.style.color=state.food<0?'#e06a6a':'#e6c558'; document.getElementById('r-food-sub').textContent=state.food<0?'⚠ głód!':'żywność';
-  const pl=prestigeLevel(); document.getElementById('title-icon').textContent=pl.title.icon; document.getElementById('title-name').textContent=pl.title.name;
-  document.getElementById('season-ind').textContent=`${seasonDisplay()} ${state.year}`;
-  renderBuildBar();
-}
-function renderBuildBar(){
-  const sc=document.getElementById('build-scroll');
-  if(sc.children.length===Object.keys(BUILDINGS).length+1){ updateAxe(sc.children[0]); let i=1; for(const t in BUILDINGS){updateCard(sc.children[i],t);i++;} return; }
-  sc.innerHTML='';
-  const axe=document.createElement('div'); axe.className='tool-card'; axe.id='axe-card'; axe.innerHTML=`<div class="tc-ico">🪓</div><div class="tc-name">Karczuj<br>las</div>`; axe.onclick=()=>{axeMode=!axeMode;selectedBuild=null;pendingTiles=[];updatePlaceBar();closeInfo();updateUI();}; sc.appendChild(axe); updateAxe(axe);
-  for(const type in BUILDINGS){ const bd=BUILDINGS[type]; const card=document.createElement('div'); card.className='build-card'; card.dataset.type=type; card.onclick=()=>selectBuild(type); card.innerHTML=`<canvas class="card-icon" width="44" height="44"></canvas><div class="card-name">${bd.name}</div><div class="card-cost"></div>`; sc.appendChild(card); miniIcon(card.querySelector('canvas').getContext('2d'),type); updateCard(card,type); }
-}
-function updateAxe(axe){ axe.classList.toggle('selected',axeMode); }
-let unlockedSet={};
-function hasUnlocked(type){ if(unlockedSet[type])return true; if(state.gold>=BUILDINGS[type].unlock){unlockedSet[type]=true;return true;} return false; }
-function updateCard(card,type){ const bd=BUILDINGS[type]; const locked=state.gold<bd.unlock&&!hasUnlocked(type); card.classList.toggle('locked',locked); card.classList.toggle('selected',selectedBuild===type); const c=card.querySelector('.card-cost'); if(locked)c.innerHTML=`<span class="card-lock">🔒 ${fmt(bd.unlock)}🪙</span>`; else { const wc=hasTech('ciesielstwo')?Math.ceil(bd.wood*0.75):bd.wood; c.innerHTML=`${fmt(bd.cost)}🪙 ${wc}🪵<div class="card-income">+${bd.income}/r</div>`; } }
-function miniIcon(c,type){
-  const x=4,y=4,s=36,cx=x+s/2,cy=y+s/2;
-  function roof(c1,c2,ins){const p=s*ins;c.fillStyle=c2;c.fillRect(x+p,y+p,s-p*2,s-p*2);c.fillStyle=c1;c.beginPath();c.moveTo(x+p,y+p);c.lineTo(x+s-p,y+p);c.lineTo(cx,cy);c.fill();c.fillStyle=shade(c1,-0.15);c.beginPath();c.moveTo(x+p,y+s-p);c.lineTo(x+s-p,y+s-p);c.lineTo(cx,cy);c.fill();c.fillStyle=shade(c2,-0.1);c.beginPath();c.moveTo(x+p,y+p);c.lineTo(x+p,y+s-p);c.lineTo(cx,cy);c.fill();c.fillStyle=shade(c2,0.05);c.beginPath();c.moveTo(x+s-p,y+p);c.lineTo(x+s-p,y+s-p);c.lineTo(cx,cy);c.fill();}
-  switch(type){
-    case 'pole': c.fillStyle='#b5933f';c.fillRect(x,y,s,s);c.strokeStyle='#8a6a28';c.lineWidth=1.5;for(let i=1;i<5;i++){c.beginPath();c.moveTo(x,y+i*s/5);c.lineTo(x+s,y+i*s/5);c.stroke();}break;
-    case 'chata': roof('#8a6230','#6b4a22',0.18);break;
-    case 'mlyn': roof('#9a8055','#5a4a30',0.2);c.strokeStyle='#3a2a18';c.lineWidth=2;for(let i=0;i<4;i++){c.save();c.translate(cx,cy);c.rotate(i*Math.PI/2);c.beginPath();c.moveTo(0,0);c.lineTo(s*0.34,0);c.stroke();c.restore();}break;
-    case 'kuznia': roof('#5a5a5a','#3a3a3a',0.18);c.fillStyle='#4a3020';c.fillRect(x+s*0.66,y+s*0.14,s*0.14,s*0.14);break;
-    case 'targ': c.fillStyle='#7a5a36';c.fillRect(x,y,s,s);const cl=['#b33a4a','#3a6b8a','#c9a227','#4a7c3f'];for(let i=0;i<4;i++){c.fillStyle=cl[i];c.fillRect(x+(i%2)*s*0.5+s*0.05,y+Math.floor(i/2)*s*0.5+s*0.05,s*0.38,s*0.22);}break;
-    case 'kosciol': roof('#b04050','#7a2030',0.16);c.strokeStyle='#e6c558';c.lineWidth=2.5;c.beginPath();c.moveTo(cx,cy-s*0.16);c.lineTo(cx,cy+s*0.16);c.stroke();c.beginPath();c.moveTo(cx-s*0.1,cy-s*0.04);c.lineTo(cx+s*0.1,cy-s*0.04);c.stroke();break;
-    case 'port': c.fillStyle='#356585';c.fillRect(x,y,s,s);c.fillStyle='#5a4a32';c.fillRect(x+s*0.1,y+s*0.55,s*0.8,s*0.35);c.fillStyle='#6b4a28';c.beginPath();c.moveTo(x+s*0.2,y+s*0.2);c.lineTo(x+s*0.6,y+s*0.2);c.lineTo(x+s*0.5,y+s*0.38);c.lineTo(x+s*0.3,y+s*0.38);c.fill();c.fillStyle='#fff';c.beginPath();c.moveTo(x+s*0.4,y+s*0.05);c.lineTo(x+s*0.4,y+s*0.2);c.lineTo(x+s*0.55,y+s*0.13);c.fill();break;
-    case 'kopalnia': c.fillStyle='#6e6860';c.fillRect(x,y,s,s);c.fillStyle='#2a2420';c.beginPath();c.arc(cx,cy+s*0.05,s*0.22,Math.PI,0);c.fill();c.fillStyle='#c9a227';c.beginPath();c.arc(x+s*0.25,y+s*0.25,s*0.06,0,6.28);c.fill();break;
-    case 'klasztor': c.fillStyle='#c8b890';c.fillRect(x,y,s,s);c.fillStyle='#6a3020';c.fillRect(x,y,s,s*0.2);c.fillRect(x,y+s*0.8,s,s*0.2);c.fillRect(x,y,s*0.2,s);c.fillRect(x+s*0.8,y,s*0.2,s);c.fillStyle='#4a7c3f';c.fillRect(x+s*0.28,y+s*0.28,s*0.44,s*0.44);break;
-    case 'grod': c.fillStyle='#6b5535';c.fillRect(x,y,s,s);c.strokeStyle='#4a3a22';c.lineWidth=3;c.strokeRect(x+s*0.1,y+s*0.1,s*0.8,s*0.8);roof('#7a5a38','#4a3526',0.34);c.fillStyle='#fff';c.fillRect(cx,cy-s*0.1,s*0.12,s*0.04);c.fillStyle='#d11';c.fillRect(cx,cy-s*0.06,s*0.12,s*0.04);break;
-    case 'zamek': c.fillStyle='#9a9080';c.fillRect(x,y,s,s);[[0,0],[0.72,0],[0,0.72],[0.72,0.72]].forEach(([dx,dy])=>{c.fillStyle='#b0a890';c.fillRect(x+s*dx,y+s*dy,s*0.28,s*0.28);c.fillStyle='#5a2530';c.beginPath();c.arc(x+s*dx+s*0.14,y+s*dy+s*0.14,s*0.08,0,6.28);c.fill();});roof('#c0b8a0','#7a7060',0.36);break;
-    case 'studnia': c.fillStyle='#5a7a42';c.fillRect(x,y,s,s);c.fillStyle='#8a8278';c.beginPath();c.ellipse(cx,cy+s*0.1,s*0.24,s*0.16,0,0,6.28);c.fill();c.fillStyle='#1a2630';c.beginPath();c.ellipse(cx,cy+s*0.06,s*0.14,s*0.09,0,0,6.28);c.fill();c.strokeStyle='#5a4028';c.lineWidth=2;c.beginPath();c.moveTo(x+s*0.3,cy);c.lineTo(x+s*0.3,y+s*0.16);c.moveTo(x+s*0.7,cy);c.lineTo(x+s*0.7,y+s*0.16);c.stroke();c.fillStyle='#7a5e2c';c.beginPath();c.moveTo(x+s*0.2,y+s*0.2);c.lineTo(cx,y+s*0.04);c.lineTo(x+s*0.8,y+s*0.2);c.closePath();c.fill();break;
-    case 'sad': c.fillStyle='#5a7a32';c.fillRect(x,y,s,s);[[0.3,0.4],[0.66,0.6],[0.34,0.72]].forEach(([tx,ty])=>{c.fillStyle='#5a3a1e';c.fillRect(x+s*tx-1.5,y+s*ty,3,s*0.16);c.fillStyle='#3a7a2e';c.beginPath();c.arc(x+s*tx,y+s*ty-s*0.02,s*0.14,0,6.28);c.fill();c.fillStyle='#d05028';c.beginPath();c.arc(x+s*tx+s*0.04,y+s*ty-s*0.04,s*0.025,0,6.28);c.fill();});break;
-    case 'piekarnia': roof('#9a5a30','#6a3a1c',0.18);c.fillStyle='#2a1a10';c.beginPath();c.arc(cx,cy+s*0.06,s*0.1,Math.PI,0);c.fill();c.fillRect(cx-s*0.1,cy+s*0.06,s*0.2,s*0.16);c.fillStyle='#ff9a30';c.beginPath();c.arc(cx,cy+s*0.08,s*0.05,0,6.28);c.fill();break;
-    case 'tartak': roof('#8a6e44','#5a4226',0.16);c.fillStyle='#c2a06a';for(let i=0;i<3;i++)c.fillRect(x+s*0.16,y+s*0.66-i*s*0.1,s*0.32,s*0.07);c.save();c.translate(x+s*0.7,y+s*0.6);c.rotate(0.6);c.fillStyle='#9a9aa0';c.beginPath();c.arc(0,0,s*0.16,0,6.28);c.fill();c.fillStyle='#3a3a40';c.beginPath();c.arc(0,0,s*0.04,0,6.28);c.fill();c.restore();break;
-    case 'stajnia': roof('#9a6a3a','#5a3a1e',0.16);c.fillStyle='#3a2614';c.beginPath();c.moveTo(x+s*0.32,y+s*0.85);c.lineTo(x+s*0.32,y+s*0.55);c.arc(cx,y+s*0.55,s*0.18,Math.PI,0);c.lineTo(x+s*0.68,y+s*0.85);c.fill();c.fillStyle='#6a4a2a';c.beginPath();c.ellipse(x+s*0.78,y+s*0.6,s*0.1,s*0.07,0,0,6.28);c.fill();break;
-    case 'browar': roof('#7a4a28','#4a2e16',0.16);c.fillStyle='#5a4028';c.fillRect(x+s*0.58,y+s*0.45,s*0.3,s*0.4);c.fillStyle='#6a4e30';c.beginPath();c.ellipse(x+s*0.73,y+s*0.45,s*0.15,s*0.06,0,0,6.28);c.fill();c.fillStyle='rgba(240,230,200,0.9)';c.beginPath();c.arc(x+s*0.73,y+s*0.4,s*0.05,0,6.28);c.fill();break;
-    case 'laznia': c.fillStyle='#5a7a42';c.fillRect(x,y,s,s);c.fillStyle='#b8a878';c.fillRect(x+s*0.16,y+s*0.45,s*0.68,s*0.4);c.fillStyle='#7a8a6a';c.beginPath();c.ellipse(cx,y+s*0.45,s*0.38,s*0.22,0,Math.PI,0,true);c.fill();c.fillStyle='#c9a227';c.beginPath();c.arc(cx,y+s*0.22,s*0.05,0,6.28);c.fill();break;
-    case 'garbarnia': roof('#6a4a2a','#3a2614',0.16);c.strokeStyle='#4a3420';c.lineWidth=2;c.strokeRect(x+s*0.55,y+s*0.3,s*0.32,s*0.55);c.fillStyle='#c2a06a';c.fillRect(x+s*0.58,y+s*0.36,s*0.26,s*0.12);c.fillStyle='#8a6a44';c.fillRect(x+s*0.58,y+s*0.56,s*0.26,s*0.12);break;
-    case 'wieza': c.fillStyle='#5a7a42';c.fillRect(x,y,s,s);c.fillStyle='#7a6a52';c.fillRect(cx-s*0.16,y+s*0.2,s*0.32,s*0.65);c.fillStyle='#8a7a60';for(let k=0;k<3;k++)c.fillRect(cx-s*0.16+k*s*0.13,y+s*0.14,s*0.08,s*0.08);c.fillStyle='#ffc85a';c.fillRect(cx-s*0.04,y+s*0.4,s*0.08,s*0.14);break;
-    case 'ratusz': c.fillStyle='#c8b896';c.fillRect(x,y+s*0.3,s,s*0.6);c.fillStyle='#b0a080';c.fillRect(cx-s*0.12,y+s*0.06,s*0.24,s*0.3);c.fillStyle='#8B1A1A';c.beginPath();c.moveTo(cx-s*0.15,y+s*0.06);c.lineTo(cx,y-s*0.04);c.lineTo(cx+s*0.15,y+s*0.06);c.closePath();c.fill();c.fillStyle='#f0e8d0';c.beginPath();c.arc(cx,y+s*0.2,s*0.06,0,6.28);c.fill();break;
-    case 'ogrod': c.fillStyle='#4a7a34';c.fillRect(x,y,s,s);c.fillStyle='#3a6a28';c.fillRect(x,y,s,s*0.12);c.fillRect(x,y+s*0.88,s,s*0.12);c.fillRect(x,y,s*0.12,s);c.fillRect(x+s*0.88,y,s*0.12,s);['#d04060','#e0a030','#c050a0','#5070d0'].forEach((col,i)=>{c.fillStyle=col;c.beginPath();c.arc(x+s*(0.32+(i%2)*0.36),y+s*(0.32+Math.floor(i/2)*0.36),s*0.08,0,6.28);c.fill();});c.fillStyle='#5a90b0';c.beginPath();c.arc(cx,cy,s*0.07,0,6.28);c.fill();break;
-    case 'pomnik': c.fillStyle='#5a7a42';c.fillRect(x,y,s,s);c.fillStyle='#9a9088';c.fillRect(cx-s*0.18,y+s*0.66,s*0.36,s*0.2);c.fillStyle='#b0a89a';c.fillRect(cx-s*0.08,y+s*0.28,s*0.16,s*0.38);c.fillStyle='#c9a227';c.beginPath();c.arc(cx,y+s*0.2,s*0.08,0,6.28);c.fill();break;
-    case 'katedra': c.fillStyle='#d4ccbc';c.fillRect(x+s*0.2,y+s*0.3,s*0.6,s*0.55);[[0.1],[0.74]].forEach(([dx])=>{c.fillStyle='#c8c0b0';c.fillRect(x+s*dx,y+s*0.12,s*0.16,s*0.73);c.fillStyle='#8B1A1A';c.beginPath();c.moveTo(x+s*dx,y+s*0.12);c.lineTo(x+s*dx+s*0.08,y-s*0.02);c.lineTo(x+s*dx+s*0.16,y+s*0.12);c.closePath();c.fill();});c.fillStyle='#6a9ad0';c.beginPath();c.arc(cx,y+s*0.45,s*0.08,0,6.28);c.fill();break;
-    default: roof('#8a6a42','#5a4a2a',0.18);
-  }
-}
-function selectBuild(type){ const bd=BUILDINGS[type]; if(state.gold<bd.unlock&&!hasUnlocked(type)){notify(`Odblokuj za ${fmt(bd.unlock)}🪙`,true);return;} pendingTiles=[]; selectedBuild=(selectedBuild===type)?null:type; axeMode=false; closeInfo(); updatePlaceBar(); updateUI(); }
-function openInfo(key){ selectedTile=key; const b=state.map[key],bd=BUILDINGS[b.type]; const [gx,gy]=key.split(',').map(Number); document.getElementById('ip-title').textContent=bd.name; const tier=Math.floor((b.level-1)/5); const tn=['','Złoty ','Mistrzowski ','Królewski ','Legendarny '][Math.min(tier,4)]; document.getElementById('ip-lvl').textContent=`${tn}Poziom ${b.level}`; let desc=bd.desc; if(hasSynergy(gx,gy,b.type))desc+=' 🔗 Łańcuch aktywny!'; document.getElementById('ip-desc').textContent=desc; document.getElementById('ip-income').textContent=Math.round(buildingIncome(b.type,b.level,gx,gy)); document.getElementById('ip-pop-stat').innerHTML=bd.pop?`Ludność: <b>+${bd.pop*b.level}</b>`:(bd.food?`Żywność: <b>${bd.food>0?'+':''}${bd.food*b.level}</b>`:''); let up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level)); if(hasTech('mecenat'))up=Math.round(up*0.8); document.getElementById('ip-upgrade').innerHTML=`⬆ Rozbuduj<br><small>${fmt(up)}🪙</small>`; const ic=document.getElementById('ip-icon'); ic.innerHTML='<canvas width="40" height="40"></canvas>'; miniIcon(ic.querySelector('canvas').getContext('2d'),b.type); document.getElementById('info-panel').classList.add('show'); }
-function closeInfo(){ document.getElementById('info-panel').classList.remove('show'); selectedTile=null; }
-function doUpgrade(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];let up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level));if(hasTech('mecenat'))up=Math.round(up*0.8);if(state.gold<up){notify('Brakuje grosza!',true);SFX.error();return;}state.gold-=up;b.level++;state.stats.upgrades++;recalc();notify(`${bd.name} → poziom ${b.level}!`);SFX.upgrade();vibrate(40);checkAchievements();openInfo(selectedTile);updateUI();autoSave(); }
-function doDemolish(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];const ref=Math.round(bd.cost*0.4*b.level);state.gold+=ref;delete state.map[selectedTile];recalc();notify(`Zburzono. Odzyskano ${fmt(ref)}🪙`);closeInfo();updateUI();autoSave(); }
-function fmt(n){ n=Math.round(n); if(n>=1e6)return(n/1e6).toFixed(1)+'mln'; if(n>=1e3)return(n/1e3).toFixed(1)+'tys'; return''+n; }
-let notifT; function notify(msg,err=false){const n=document.getElementById('notif');n.textContent=msg;n.className='show'+(err?' err':'');clearTimeout(notifT);notifT=setTimeout(()=>n.className=err?'err':'',1800);}
-function floatText(x,y,txt,color='#e6c558'){const el=document.createElement('div');el.className='float-text';el.textContent=txt;el.style.left=x+'px';el.style.top=y+'px';el.style.color=color;document.getElementById('canvas-wrap').appendChild(el);setTimeout(()=>el.remove(),1200);}
-function centerView(){camX=0;camY=0;zoom=clampZoom(0.6);}
-
-// =====================================================================
-//  INPUT
-// =====================================================================
-function setupInput(){
-  const el=canvas;
-  el.addEventListener('pointerdown',e=>{ const c=evToCanvas(e); dragging=true; dragMoved=false; camStartX=c.x-camX; camStartY=c.y-camY; });
-  el.addEventListener('pointermove',e=>{ const c=evToCanvas(e); hover=screenToGrid(c.x,c.y); if(dragging){ const nx=c.x-camStartX,ny=c.y-camStartY; if(Math.abs(nx-camX)>3||Math.abs(ny-camY)>3)dragMoved=true; camX=nx; camY=ny; } });
-  el.addEventListener('pointerup',e=>{ dragging=false; if(dragMoved)return;
-    const c=evToCanvas(e); const g=screenToGrid(c.x,c.y); const key=`${g.gx},${g.gy}`;
-    if(axeMode){ clearForest(g.gx,g.gy); return; }
-    if(selectedBuild){
-      if(!plotOwned(g.gx,g.gy)){ if(tryBuyPlot(g.gx,g.gy))return; }
-      const idx=pendingTiles.findIndex(p=>p.gx===g.gx&&p.gy===g.gy);
-      if(idx>=0){ pendingTiles.splice(idx,1); SFX.click(); }
-      else { if(canPlace(g.gx,g.gy)){ pendingTiles.push({gx:g.gx,gy:g.gy}); SFX.click(); vibrate(15); }
-        else { const t=getTerrain(g.gx,g.gy); const bd=BUILDINGS[selectedBuild];
-          if(t.type==='forest')notify('Najpierw wykarczuj las! 🪓',true);
-          else if(bd.needsWater)notify('Port buduj na wodzie! 🌊',true);
-          else if(bd.needsMountain)notify('Kopalnię buduj w górach! ⛰️',true);
-          else notify('Nie można tu budować!',true); SFX.error(); } }
-      updatePlaceBar();
-      return;
-    }
-    if(state.map[key]&&fogLevel(g.gx,g.gy)===0){ openInfo(key); }
-    else if(!plotOwned(g.gx,g.gy)){ tryBuyPlot(g.gx,g.gy); }
-    else { closeInfo(); } });
-  el.addEventListener('pointercancel',()=>{dragging=false;});
-
-  el.addEventListener('touchmove',e=>{
-    if(e.touches.length===2){
-      e.preventDefault();
-      const r=canvas.getBoundingClientRect();
-      const t0=e.touches[0], t1=e.touches[1];
-      const mx=(t0.clientX+t1.clientX)/2 - r.left;
-      const my=(t0.clientY+t1.clientY)/2 - r.top;
-      const d=Math.hypot(t0.clientX-t1.clientX, t0.clientY-t1.clientY);
-      if(pinchPrev>0){
-        const oldZoom=zoom;
-        const newZoom=clampZoom(zoom*(d/pinchPrev));
-        const k=newZoom/oldZoom;
-        zoom=newZoom;
-        if(k!==1){
-          camX = mx - W/2 - (mx - camX - W/2)*k;
-          camY = my - H/2 - (my - camY - H/2)*k;
-        }
-      }
-      pinchPrev=d;
-    }
-  },{passive:false});
-  el.addEventListener('touchend',()=>{ pinchPrev=0; });
-
-  el.addEventListener('wheel',e=>{
-    e.preventDefault();
-    const c=evToCanvas(e);
-    const oldZoom=zoom;
-    const newZoom=clampZoom(zoom - e.deltaY*0.0015);
-    const k=newZoom/oldZoom;
-    zoom=newZoom;
-    if(k!==1){
-      camX = c.x - W/2 - (c.x - camX - W/2)*k;
-      camY = c.y - H/2 - (c.y - camY - H/2)*k;
-    }
-  },{passive:false});
-}
-function resize(){ dpr=window.devicePixelRatio||1; const wrap=document.getElementById('canvas-wrap'); W=wrap.clientWidth; H=wrap.clientHeight; canvas.width=W*dpr; canvas.height=H*dpr; canvas.style.width=W+'px'; canvas.style.height=H+'px'; ctx.setTransform(dpr,0,0,dpr,0,0); }
-function startGame(){ document.getElementById('intro').style.display='none'; ac(); if(settings.music && musicReady && musicTracks.length) playRandomTrack();
-  if(started){ return; } started=true; gameLoop=setInterval(tick,TICK_MS);
-  let seen=false; try{ seen=localStorage.getItem(tutSeenKey)==='1'; }catch(e){}
-  if(!seen){ showTutorial(); } else { notify('Witaj, Książę! Karczuj las po drewno.'); }
-  saveGame(false); }
-
-// =====================================================================
-//  AUDIO
-// =====================================================================
-const settings = { music:true, musicVol:0.2, sfx:true, sfxVol:0.6, vibe:true };
-const SET_KEY='dziedzic_settings_v1';
-function loadSettings(){ try{ const r=localStorage.getItem(SET_KEY); if(r)Object.assign(settings,JSON.parse(r)); }catch(e){} }
-function saveSettings(){ try{ localStorage.setItem(SET_KEY,JSON.stringify(settings)); }catch(e){} }
-
-let audioCtx=null;
-function ac(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume(); return audioCtx; }
-
-function tone(freq,dur,type='sine',vol=1,slideTo=null){
-  if(!settings.sfx) return; const c=ac(); if(!c) return;
-  const o=c.createOscillator(), g=c.createGain();
-  o.type=type; o.frequency.setValueAtTime(freq,c.currentTime);
-  if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo,c.currentTime+dur);
-  const v=vol*settings.sfxVol;
-  g.gain.setValueAtTime(0.0001,c.currentTime);
-  g.gain.exponentialRampToValueAtTime(Math.max(0.001,v),c.currentTime+0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
-  o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+dur+0.02);
-}
-function noiseBurst(dur,vol=1,filterFreq=1000){
-  if(!settings.sfx) return; const c=ac(); if(!c) return;
-  const n=Math.floor(c.sampleRate*dur); const buf=c.createBuffer(1,n,c.sampleRate); const data=buf.getChannelData(0);
-  for(let i=0;i<n;i++) data[i]=(Math.random()*2-1)*(1-i/n);
-  const src=c.createBufferSource(); src.buffer=buf;
-  const f=c.createBiquadFilter(); f.type='lowpass'; f.frequency.value=filterFreq;
-  const g=c.createGain(); g.gain.value=vol*settings.sfxVol;
-  src.connect(f); f.connect(g); g.connect(c.destination); src.start();
-}
-const SFX = {
-  build(){ tone(330,0.08,'square',0.25); setTimeout(()=>tone(523,0.12,'square',0.25),70); setTimeout(()=>tone(784,0.15,'triangle',0.2),150); },
-  chop(){ noiseBurst(0.12,0.5,800); setTimeout(()=>noiseBurst(0.08,0.3,500),60); },
-  coin(){ tone(880,0.06,'square',0.15); setTimeout(()=>tone(1318,0.1,'square',0.12),50); },
-  land(){ tone(440,0.1,'sine',0.2,660); setTimeout(()=>tone(660,0.15,'sine',0.2,880),90); },
-  upgrade(){ [392,494,587,784].forEach((f,i)=>setTimeout(()=>tone(f,0.12,'triangle',0.2),i*70)); },
-  error(){ tone(180,0.15,'sawtooth',0.15,120); },
-  click(){ tone(600,0.04,'square',0.1); },
-};
-function vibrate(ms){ if(settings.vibe && navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
-
-let musicEl=null, musicTracks=[], musicReady=false;
-function setupMusic(){
-  musicEl=new Audio(); musicEl.volume=settings.musicVol;
-  musicEl.addEventListener('ended',playRandomTrack);
-  musicEl.addEventListener('error',()=>{});
-}
-function probeTracks(maxN=12){
-  let pending=maxN, found=[];
-  for(let i=1;i<=maxN;i++){
-    const a=new Audio(); a.src=i+'.mp3';
-    a.addEventListener('canplaythrough',()=>{ found.push(i+'.mp3'); if(--pending<=0)finish(); },{once:true});
-    a.addEventListener('error',()=>{ if(--pending<=0)finish(); },{once:true});
-    a.load();
-  }
-  function finish(){ musicTracks=found.sort((x,y)=>parseInt(x)-parseInt(y)); musicReady=true; if(settings.music&&musicTracks.length)playRandomTrack(); }
-  setTimeout(()=>{ if(!musicReady){ musicReady=true; if(settings.music&&musicTracks.length)playRandomTrack(); } },4000);
-}
-function playRandomTrack(){
-  if(!settings.music||!musicTracks.length||!musicEl) return;
-  const t=musicTracks[Math.floor(Math.random()*musicTracks.length)];
-  musicEl.src=t; musicEl.volume=settings.musicVol;
-  musicEl.play().catch(()=>{});
-}
-function stopMusic(){ if(musicEl){ musicEl.pause(); } }
-
-// =====================================================================
-//  USTAWIENIA — UI
-// =====================================================================
-function openSettings(){ SFX.click(); syncSettingsUI(); document.getElementById('settings').classList.add('show'); }
-function closeSettings(){ document.getElementById('settings').classList.remove('show'); }
-function syncSettingsUI(){
-  document.getElementById('set-music').checked=settings.music;
-  document.getElementById('set-music-vol').value=Math.round(settings.musicVol*100);
-  document.getElementById('set-sfx').checked=settings.sfx;
-  document.getElementById('set-sfx-vol').value=Math.round(settings.sfxVol*100);
-  document.getElementById('set-vibe').checked=settings.vibe;
-}
-function onMusicToggle(){ settings.music=document.getElementById('set-music').checked; saveSettings(); if(settings.music){ if(musicReady&&musicTracks.length)playRandomTrack(); } else stopMusic(); }
-function onMusicVol(){ settings.musicVol=document.getElementById('set-music-vol').value/100; if(musicEl)musicEl.volume=settings.musicVol; saveSettings(); }
-function onSfxToggle(){ settings.sfx=document.getElementById('set-sfx').checked; saveSettings(); if(settings.sfx)SFX.click(); }
-function onSfxVol(){ settings.sfxVol=document.getElementById('set-sfx-vol').value/100; saveSettings(); SFX.click(); }
-function onVibeToggle(){ settings.vibe=document.getElementById('set-vibe').checked; saveSettings(); if(settings.vibe)vibrate(30); }
-function resetFromSettings(){ closeSettings(); document.getElementById('confirm').classList.add('show'); SFX.click(); }
-
-// =====================================================================
-//  SAMOUCZEK
-// =====================================================================
-const TUT_STEPS=[
-  { icon:'🦅', title:'Witaj, Książę!', text:'Rządzisz małą osadą w roku 966. Twoim celem jest rozbudowa potężnego księstwa. Pokażę Ci podstawy w kilka chwil.' },
-  { icon:'🌾', title:'Buduj', text:'Wybierz budynek z dolnego paska, a potem dotknij pola na mapie. Zacznij od Pól (jedzenie) i Chat (mieszkańcy). Każdy budynek kosztuje grosz 🪙 i drewno 🪵.' },
-  { icon:'🪓', title:'Karczuj las', text:'Drewno zdobywasz wycinając lasy. Wybierz zielone narzędzie 🪓 i dotknij lasu na swojej ziemi — dostaniesz drewno i odsłonisz pole pod budowę.' },
-  { icon:'🪙', title:'Zarabiaj', text:'Budynki co rok dają grosz. Targowiska i porty zarabiają najwięcej. Uwaga na żywność 🌾 — gdy spadnie poniżej zera, lud głoduje i dochód maleje!' },
-  { icon:'🗺️', title:'Zdobywaj ziemie', text:'Złote pola obok Twoich gruntów możesz wykupić. Każda kolejna ziemia jest droższa, ale odsłania nowe krainy: puszcze, rzeki, góry i morze.' },
-  { icon:'⬆️', title:'Rozbudowuj', text:'Dotknij swojego budynku, by go ulepszyć. Wyższe poziomy = większy dochód, a gwiazdki zmieniają kolor co 5 poziomów.' },
-  { icon:'📜', title:'Rozwój i sława', text:'Kościoły i klasztory dają Wiedzę 📜 — wydawaj ją na technologie (przycisk 📜). Zdobywaj osiągnięcia 🏆 i podnoś prestiż, by awansować z Wodza aż na Imperatora.' },
-  { icon:'🔗', title:'Głębia', text:'Stawiaj budynki obok siebie dla premii (Młyn przy Polu, Kuźnia przy Kopalni — szukaj 🔗). Pilnuj pór roku 🍂 (zima = mało żywności), broń się grodami przed najazdami ⚔️ i mądrze rozstrzygaj wydarzenia. Powodzenia, Władco!' },
-];
-let tutStep=0, tutSeenKey='grod_tut_seen_v1';
-function showTutorial(force=false){
-  tutStep=0; renderTut(); document.getElementById('tutorial').classList.add('show');
-}
-function renderTut(){
-  const s=TUT_STEPS[tutStep];
-  document.getElementById('tut-icon').textContent=s.icon;
-  document.getElementById('tut-title').textContent=s.title;
-  document.getElementById('tut-text').textContent=s.text;
-  document.getElementById('tut-next').textContent=(tutStep===TUT_STEPS.length-1)?'Zaczynamy! ⚔':'Dalej →';
-  const dots=document.getElementById('tut-dots'); dots.innerHTML='';
-  TUT_STEPS.forEach((_,i)=>{ const d=document.createElement('span'); if(i===tutStep)d.className='on'; dots.appendChild(d); });
-}
-function nextTut(){ SFX.click(); vibrate(15); if(tutStep<TUT_STEPS.length-1){ tutStep++; renderTut(); } else endTutorial(); }
-function endTutorial(){ document.getElementById('tutorial').classList.remove('show'); try{ localStorage.setItem(tutSeenKey,'1'); }catch(e){} }
-
-// =====================================================================
-//  PROGRESJA
-// =====================================================================
-function checkAchievements(){
-  for(const a of ACHIEVEMENTS){
-    if(!state.ach[a.id] && a.check()){
-      state.ach[a.id]=true;
-      if(a.reward){ if(a.reward.gold)state.gold+=a.reward.gold; if(a.reward.wood)state.wood+=a.reward.wood; if(a.reward.know)state.know+=a.reward.know; }
-      achQueue.push(a);
-    }
-  }
-  if(achQueue.length && !achShowing) showNextAch();
-}
-function showNextAch(){
-  if(!achQueue.length){ achShowing=false; return; }
-  achShowing=true;
-  const a=achQueue.shift();
-  document.getElementById('at-icon').textContent=a.icon;
-  let rewardTxt=''; if(a.reward){ if(a.reward.gold)rewardTxt=` +${a.reward.gold}🪙`; else if(a.reward.wood)rewardTxt=` +${a.reward.wood}🪵`; else if(a.reward.know)rewardTxt=` +${a.reward.know}📜`; }
-  document.getElementById('at-name').textContent=a.name+rewardTxt;
-  const t=document.getElementById('ach-toast'); t.classList.add('show');
-  SFX.upgrade(); vibrate([30,40,30]);
-  setTimeout(()=>{ t.classList.remove('show'); setTimeout(showNextAch,500); },2600);
-}
-
-function canBuyTech(branch,item){
-  if(state.tech[item.id]) return false;
-  if(item.req && !state.tech[item.req]) return false;
-  return state.know>=item.cost;
-}
-function buyTech(branchKey,itemId){
-  let item=null; for(const b in TECH){ for(const it of TECH[b].items){ if(it.id===itemId)item=it; } }
-  if(!item||state.tech[itemId]) return;
-  if(item.req&&!state.tech[item.req]){ notify('Najpierw odblokuj wcześniejszą technologię!',true); SFX.error(); return; }
-  if(state.know<item.cost){ notify(`Brakuje wiedzy! (${item.cost}📜)`,true); SFX.error(); return; }
-  state.know-=item.cost; state.tech[itemId]=true;
-  notify(`Odkryto: ${item.name}!`); SFX.upgrade(); vibrate(40);
-  recalc(); checkAchievements(); updateUI(); renderProgress(); autoSave();
-}
-
-let progTab='tech';
-function openProgress(){ SFX.click(); progTab='tech'; document.querySelectorAll('.prog-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='tech')); renderProgress(); document.getElementById('progress').classList.add('show'); }
-function closeProgress(){ document.getElementById('progress').classList.remove('show'); }
-function switchTab(tab){ progTab=tab; SFX.click(); document.querySelectorAll('.prog-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab)); renderProgress(); }
-function renderProgress(){
-  const pl=prestigeLevel();
-  document.getElementById('prog-title-icon').textContent=pl.title.icon;
-  document.getElementById('prog-title-name').textContent=pl.title.name;
-  if(pl.next){ const span=pl.next.min-pl.title.min, prog=pl.p-pl.title.min; document.getElementById('prestige-fill').style.width=Math.min(100,prog/span*100)+'%'; document.getElementById('prog-prestige-text').textContent=`Prestiż: ${pl.p} — do tytułu „${pl.next.name}" brakuje ${pl.next.min-pl.p}`; }
-  else { document.getElementById('prestige-fill').style.width='100%'; document.getElementById('prog-prestige-text').textContent=`Prestiż: ${pl.p} — najwyższy tytuł!`; }
-  const c=document.getElementById('prog-content');
-  if(progTab==='tech'){
-    let h='';
-    for(const bk in TECH){ const br=TECH[bk]; h+=`<div class="tech-branch"><div class="tech-branch-title">${br.icon} ${br.label}</div>`;
-      for(const it of br.items){ const owned=!!state.tech[it.id]; const avail=canBuyTech(bk,it); const locked=it.req&&!state.tech[it.req];
-        let btn = owned?`<button class="tech-btn done">✓ Mam</button>` : locked?`<button class="tech-btn lock">🔒 ${it.cost}📜</button>` : `<button class="tech-btn ${avail?'buy':'lock'}" onclick="buyTech('${bk}','${it.id}')">${it.cost}📜</button>`;
-        h+=`<div class="tech-item ${owned?'unlocked':avail?'available':''}"><div class="tech-info"><div class="tech-name">${it.name}</div><div class="tech-desc">${it.desc}</div></div>${btn}</div>`; }
-      h+='</div>'; }
-    c.innerHTML=h;
-  } else if(progTab==='ach'){
-    let got=ACHIEVEMENTS.filter(a=>state.ach[a.id]).length;
-    let h=`<div style="text-align:center;color:#b8a878;font-size:12px;margin-bottom:10px">Zdobyto ${got} z ${ACHIEVEMENTS.length}</div><div class="ach-grid">`;
-    for(const a of ACHIEVEMENTS){ const got=!!state.ach[a.id]; h+=`<div class="ach-item ${got?'got':''}"><div class="ach-ico">${a.icon}</div><div class="ach-name">${a.name}</div><div class="ach-desc">${got?'✓ zdobyte':a.desc}</div></div>`; }
-    h+='</div>'; c.innerHTML=h;
-  } else {
-    const s=state.stats;
-    c.innerHTML=`
-      <div class="stat-line"><span class="sl-label">Rok panowania</span><span class="sl-val">${state.year}</span></div>
-      <div class="stat-line"><span class="sl-label">Budynków postawionych</span><span class="sl-val">${s.built}</span></div>
-      <div class="stat-line"><span class="sl-label">Ulepszeń</span><span class="sl-val">${s.upgrades}</span></div>
-      <div class="stat-line"><span class="sl-label">Lasów wykarczowanych</span><span class="sl-val">${s.cleared}</span></div>
-      <div class="stat-line"><span class="sl-label">Ziem wykupionych</span><span class="sl-val">${state.plotsBought}</span></div>
-      <div class="stat-line"><span class="sl-label">Szczyt grosza</span><span class="sl-val">${fmt(s.peakGold)}🪙</span></div>
-      <div class="stat-line"><span class="sl-label">Szczyt ludności</span><span class="sl-val">${fmt(s.peakPop)}👥</span></div>
-      <div class="stat-line"><span class="sl-label">Technologii odkrytych</span><span class="sl-val">${Object.keys(state.tech).length} / 20</span></div>
-      <div class="stat-line"><span class="sl-label">Dochód roczny</span><span class="sl-val">+${fmt(incomePerYear())}🪙</span></div>
-      <div class="stat-line"><span class="sl-label">Wiedza / rok</span><span class="sl-val">+${fmt(knowPerYear())}📜</span></div>
-      <div class="stat-line"><span class="sl-label">Siła obrony</span><span class="sl-val">${defenseLevel()} 🛡️</span></div>
-      <div class="stat-line"><span class="sl-label">Najazdów przetrwanych</span><span class="sl-val">${state.stats.raidsSurvived}</span></div>
-      <div class="stat-line"><span class="sl-label">Wydarzeń rozstrzygniętych</span><span class="sl-val">${state.stats.eventsHandled}</span></div>
-      <div class="stat-line"><span class="sl-label">Pora roku</span><span class="sl-val">${season().icon} ${season().name}</span></div>`;
-  }
-}
-
-function init(){
-  canvas=document.getElementById('game-canvas'); ctx=canvas.getContext('2d');
-  resize(); window.addEventListener('resize',resize); setupInput();
-  try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); }catch(e){ storageOK=false; }
-  loadSettings(); setupMusic(); probeTracks();
-  const loaded=loadGame();
-  recalc(); displayGold=state.gold; initSnow(); updatePlaceBar(); updateUI(); render(); animateCounters();
-  if(loaded && started){
-    document.getElementById('intro').style.display='none';
-    gameLoop=setInterval(tick,TICK_MS);
-    notify('Wczytano zapis! 📜');
-  } else if(loaded){
-    document.getElementById('start-btn').textContent='⚔ KONTYNUUJ';
-    document.getElementById('reset-btn').style.display='inline-block';
-    document.getElementById('intro-sub').textContent='Znaleziono zapisaną grę. Kontynuuj swoje panowanie albo zacznij od nowa.';
-  }
-  if(!storageOK){
-    document.getElementById('intro-sub').innerHTML+='<br><br><span style="color:#c08050;font-size:12px">⚠ W tym podglądzie zapis nie działa. Pobierz plik HTML i otwórz w przeglądarce telefonu — wtedy zapis zadziała.</span>';
-  }
-  window.addEventListener('visibilitychange',()=>{ if(document.hidden){ saveGame(false); stopMusic(); } else if(settings.music&&started&&musicTracks.length){ musicEl.play().catch(()=>{}); } });
-  window.addEventListener('pagehide',()=>saveGame(false));
-  window.addEventListener('beforeunload',()=>saveGame(false));
-}
-init();
-</script>
-</body>
-</html>
+      ctx.strokeStyle='#9a8a4a'; ctx.lineWidth=1.5*zoom; ctx.beginPath
