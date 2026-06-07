@@ -108,6 +108,66 @@
   .slider:before { content:''; position:absolute; height:20px; width:20px; left:3px; top:3px; background:#e8dcc0; border-radius:50%; transition:.2s; }
   .switch input:checked + .slider { background:var(--green); }
   .switch input:checked + .slider:before { transform:translateX(20px); }
+
+  /* EKRAN POSTĘPU */
+  #progress { position:absolute; inset:0; z-index:115; background:rgba(10,7,4,0.82); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:16px; }
+  #progress.show { display:flex; }
+  .prog-box { background:linear-gradient(165deg,#3a2818,#221610); border:3px solid var(--gold); border-radius:14px; padding:18px 16px; max-width:380px; width:100%; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 8px 30px #000; position:relative; }
+  .prog-close { position:absolute; top:12px; right:16px; color:var(--gold); font-size:22px; cursor:pointer; line-height:1; z-index:2; }
+  .prog-crest { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .prog-icon { font-size:38px; }
+  .prog-title { font-family:'Cinzel'; font-weight:900; font-size:22px; color:var(--gold-light); letter-spacing:1px; }
+  .prog-sub { font-size:12px; color:#b8a878; }
+  .prestige-bar { height:8px; background:#2a1d10; border-radius:6px; overflow:hidden; margin-bottom:14px; border:1px solid #5a4a30; }
+  .prestige-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:6px; transition:width .4s; width:0%; }
+  .prog-tabs { display:flex; gap:4px; margin-bottom:12px; }
+  .prog-tab { flex:1; text-align:center; font-family:'Cinzel'; font-weight:700; font-size:11px; color:#9a8a6a; background:#2a1d10; border:1px solid #4a3a22; border-radius:8px; padding:8px 4px; cursor:pointer; }
+  .prog-tab.active { color:var(--wood-dark); background:linear-gradient(160deg,var(--gold-light),var(--gold)); border-color:var(--gold); }
+  .prog-content { overflow-y:auto; flex:1; }
+  .prog-content::-webkit-scrollbar { width:4px; } .prog-content::-webkit-scrollbar-thumb { background:var(--gold); border-radius:2px; }
+  /* tech */
+  .tech-branch { margin-bottom:14px; }
+  .tech-branch-title { font-family:'Cinzel'; font-weight:700; font-size:13px; color:var(--gold-light); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+  .tech-item { background:#241810; border:1px solid #4a3a22; border-radius:8px; padding:9px 10px; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
+  .tech-item.unlocked { border-color:var(--green); background:#1a2814; }
+  .tech-item.available { border-color:var(--gold); }
+  .tech-info { flex:1; }
+  .tech-name { font-family:'Cinzel'; font-weight:700; font-size:12px; color:var(--parchment); }
+  .tech-desc { font-size:11px; color:#a89878; font-style:italic; }
+  .tech-btn { font-family:'Cinzel'; font-weight:700; font-size:11px; border-radius:6px; padding:7px 10px; cursor:pointer; border:none; white-space:nowrap; }
+  .tech-btn.buy { background:linear-gradient(160deg,var(--gold-light),var(--gold)); color:var(--wood-dark); }
+  .tech-btn.done { background:none; color:var(--green); border:1px solid var(--green); }
+  .tech-btn.lock { background:#2a1d10; color:#7a6a4a; border:1px solid #4a3a22; }
+  /* achievements */
+  .ach-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .ach-item { background:#241810; border:1px solid #4a3a22; border-radius:8px; padding:10px 8px; text-align:center; opacity:0.5; }
+  .ach-item.got { opacity:1; border-color:var(--gold); background:#2a2010; }
+  .ach-ico { font-size:26px; margin-bottom:4px; filter:grayscale(1); }
+  .ach-item.got .ach-ico { filter:none; }
+  .ach-name { font-family:'Cinzel'; font-weight:700; font-size:10px; color:var(--parchment); line-height:1.2; }
+  .ach-desc { font-size:9px; color:#9a8a6a; margin-top:2px; }
+  /* stats */
+  .stat-line { display:flex; justify-content:space-between; padding:8px 4px; border-bottom:1px solid #3a2d1a; font-size:13px; }
+  .stat-line .sl-label { color:#b8a878; } .stat-line .sl-val { color:var(--gold-light); font-family:'Cinzel'; font-weight:700; }
+
+  /* TOAST OSIĄGNIĘCIA */
+  #ach-toast { position:absolute; top:70px; left:50%; transform:translateX(-50%) translateY(-120px); background:linear-gradient(160deg,#4a3a1a,#2a1d0a); border:2px solid var(--gold-light); border-radius:10px; padding:10px 18px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 20px #000,0 0 20px #c9a22766; z-index:120; transition:transform .4s cubic-bezier(.2,1.4,.4,1); }
+  #ach-toast.show { transform:translateX(-50%) translateY(0); }
+  .at-icon { font-size:32px; }
+  .at-label { font-family:'Cinzel'; font-size:10px; color:var(--gold); letter-spacing:1px; }
+  .at-name { font-family:'Cinzel'; font-weight:900; font-size:14px; color:var(--gold-light); }
+
+  /* KARTA WYDARZENIA */
+  #event { position:absolute; inset:0; z-index:118; background:rgba(10,7,4,0.85); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:24px; }
+  #event.show { display:flex; }
+  .ev-box { background:linear-gradient(165deg,var(--parchment),var(--parchment-dark)); border:3px solid var(--crimson); border-radius:14px; padding:24px 22px; max-width:360px; width:100%; text-align:center; box-shadow:0 8px 40px #000; animation:evpop .3s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes evpop { from{transform:scale(0.85);opacity:0;} to{transform:scale(1);opacity:1;} }
+  .ev-icon { font-size:52px; margin-bottom:8px; }
+  .ev-title { font-family:'Cinzel'; font-weight:900; font-size:22px; color:var(--crimson); margin-bottom:12px; }
+  .ev-text { font-size:15px; line-height:1.55; color:var(--ink); margin-bottom:18px; }
+  .ev-options { display:flex; flex-direction:column; gap:8px; }
+  .ev-opt { background:linear-gradient(160deg,#4a3a20,#2f2410); border:2px solid var(--gold); color:var(--gold-light); border-radius:8px; padding:12px; font-family:'Cinzel'; font-weight:700; font-size:14px; cursor:pointer; }
+  .ev-opt:active { transform:scale(0.97); }
 </style>
 </head>
 <body>
@@ -115,15 +175,17 @@
   <div id="topbar">
     <div class="resource"><div class="resource-row"><span class="ico">🪙</span><span class="val" id="r-gold">0</span></div><div class="sub" id="r-gold-rate">+0/rok</div></div>
     <div class="resource"><div class="resource-row"><span class="ico">🪵</span><span class="val" id="r-wood">0</span></div><div class="sub">drewno</div></div>
+    <div class="resource"><div class="resource-row"><span class="ico">📜</span><span class="val" id="r-know">0</span></div><div class="sub">wiedza</div></div>
     <div class="resource"><div class="resource-row"><span class="ico">👥</span><span class="val" id="r-pop">0</span></div><div class="sub">lud</div></div>
     <div class="resource"><div class="resource-row"><span class="ico">🌾</span><span class="val" id="r-food">0</span></div><div class="sub" id="r-food-sub">żywność</div></div>
-    <div id="title-crest"><div class="crest">🦅</div><div class="name">GRÓD PIASTÓW</div></div>
+    <div id="title-crest" onclick="openProgress()" style="cursor:pointer"><div class="crest" id="title-icon">👑</div><div class="name" id="title-name">WÓDZ</div><div class="name" id="season-ind" style="font-size:9px;color:#b8a878">🌱 966</div></div>
   </div>
   <div id="canvas-wrap">
     <canvas id="game-canvas"></canvas>
     <div id="side-controls">
       <div class="ctrl-btn" onclick="toggleSpeed()" id="speed-btn">⏩</div>
       <div class="ctrl-btn" onclick="centerView()">🎯</div>
+      <div class="ctrl-btn" onclick="openProgress()" style="font-size:16px">📜</div>
       <div class="ctrl-btn" onclick="saveGame(true)" style="font-size:15px">💾</div>
       <div class="ctrl-btn" onclick="openSettings()" style="font-size:16px">⚙️</div>
     </div>
@@ -194,13 +256,41 @@
       <div class="set-hint">Muzyka: wrzuć pliki <b>1.mp3, 2.mp3...</b> obok pliku gry — gra losuje je sama.</div>
     </div>
   </div>
+
+  <!-- EKRAN POSTĘPU -->
+  <div id="progress">
+    <div class="prog-box">
+      <span class="prog-close" onclick="closeProgress()">✕</span>
+      <div class="prog-crest"><div class="prog-icon" id="prog-title-icon">👑</div><div><div class="prog-title" id="prog-title-name">WÓDZ</div><div class="prog-sub" id="prog-prestige-text">Prestiż: 0</div></div></div>
+      <div class="prestige-bar"><div class="prestige-fill" id="prestige-fill"></div></div>
+      <div class="prog-tabs">
+        <div class="prog-tab active" data-tab="tech" onclick="switchTab('tech')">📜 Technologie</div>
+        <div class="prog-tab" data-tab="ach" onclick="switchTab('ach')">🏆 Osiągnięcia</div>
+        <div class="prog-tab" data-tab="stat" onclick="switchTab('stat')">📊 Kronika</div>
+      </div>
+      <div class="prog-content" id="prog-content"></div>
+    </div>
+  </div>
+
+  <!-- KARTA WYDARZENIA -->
+  <div id="event">
+    <div class="ev-box">
+      <div class="ev-icon" id="ev-icon">📜</div>
+      <div class="ev-title" id="ev-title">Wydarzenie</div>
+      <div class="ev-text" id="ev-text"></div>
+      <div class="ev-options" id="ev-options"></div>
+    </div>
+  </div>
+
+  <!-- TOAST OSIĄGNIĘCIA -->
+  <div id="ach-toast"><div class="at-icon" id="at-icon">🏆</div><div><div class="at-label">Osiągnięcie!</div><div class="at-name" id="at-name"></div></div></div>
 </div>
 
 <script>
 // =====================================================================
 //  GRÓD PIASTÓW v4 — localStorage + fix kliknięcia + fix zoomu
 // =====================================================================
-const TILE=70, PLOT=5, TICK_MS=1500, SAVE_KEY='grod_piastow_save_v4';
+const TILE=70, PLOT=5, TICK_MS=4000, SAVE_KEY='grod_piastow_save_v5';
 
 const BUILDINGS = {
   pole:     { name:'Pole Uprawne', cost:40,   wood:5,   income:3,  pop:0,  food:6,  unlock:0,    desc:'Żyzna ziemia daje chleb i grosz.' },
@@ -218,13 +308,243 @@ const BUILDINGS = {
 const UPGRADE_MULT=1.6;
 const STAR_TIERS=['#a06a3a','#c0c0c8','#e6c558','#5ad0e0','#c060e0','#ff5a5a'];
 
-function freshState(){ return { gold:120, wood:80, pop:0, food:0, map:{}, cleared:{}, year:966, speed:1, ownedPlots:{'0,0':true}, plotsBought:1 }; }
+// ---- TECHNOLOGIE (4 gałęzie) ----
+const TECH = {
+  rolnictwo: { label:'Rolnictwo', icon:'🌾', items:[
+    { id:'plodozmian', name:'Płodozmian',     cost:25,  desc:'Pola +50% żywności', req:null },
+    { id:'mlynarstwo', name:'Młynarstwo',     cost:60,  desc:'Młyny +50% dochodu', req:'plodozmian' },
+    { id:'sady',       name:'Sady i pasieki', cost:130, desc:'Klasztory +50% żywności', req:'mlynarstwo' },
+    { id:'nawadnianie',name:'Nawadnianie',    cost:280, desc:'Pola +50% dochodu', req:'sady' },
+    { id:'spichlerze', name:'Spichlerze',     cost:500, desc:'Zima nie zmniejsza żywności', req:'nawadnianie' },
+  ]},
+  rzemioslo: { label:'Rzemiosło', icon:'🔨', items:[
+    { id:'ciesielstwo',name:'Ciesielstwo',    cost:35,  desc:'Budowa -25% drewna', req:null },
+    { id:'kowalstwo',  name:'Kowalstwo',      cost:80,  desc:'Kuźnie +60% dochodu', req:'ciesielstwo' },
+    { id:'handel',     name:'Szlaki handlowe',cost:150, desc:'Targi i porty +50% dochodu', req:'kowalstwo' },
+    { id:'gornictwo',  name:'Górnictwo głębinowe',cost:320,desc:'Kopalnie +80% dochodu', req:'handel' },
+    { id:'cechy',      name:'Cechy rzemieślnicze',cost:600,desc:'Wszystkie budynki +20% dochodu', req:'gornictwo' },
+  ]},
+  kultura: { label:'Kultura', icon:'📖', items:[
+    { id:'pismo',      name:'Pismo',          cost:40,  desc:'Wiedza +50% produkcji', req:null },
+    { id:'prawo',      name:'Prawo książęce', cost:100, desc:'Ludność +30% dochodu', req:'pismo' },
+    { id:'mecenat',    name:'Mecenat',        cost:200, desc:'Ulepszenia -20% kosztu', req:'prawo' },
+    { id:'uniwersytet',name:'Akademia',       cost:420, desc:'Wiedza +100% produkcji', req:'mecenat' },
+    { id:'kronikarze', name:'Kronikarze',     cost:750, desc:'Prestiż rośnie 2× szybciej', req:'uniwersytet' },
+  ]},
+  wojsko: { label:'Wojskowość', icon:'⚔️', items:[
+    { id:'palisada',   name:'Palisady',       cost:45,  desc:'Grody chronią lepiej', req:null },
+    { id:'straz',      name:'Straż grodowa',  cost:110, desc:'Mniejsze straty z najazdów', req:'palisada' },
+    { id:'mury',       name:'Mury kamienne',  cost:240, desc:'Zamki dają silną obronę', req:'straz' },
+    { id:'rycerstwo',  name:'Rycerstwo',      cost:480, desc:'Najazdy rzadsze i słabsze', req:'mury' },
+    { id:'choragiew',  name:'Chorągiew',      cost:800, desc:'Najazdy dają łup zamiast strat', req:'rycerstwo' },
+  ]},
+};
+function hasTech(id){ return !!state.tech[id]; }
+function defenseLevel(){
+  let d=0;
+  for(const k in state.map){ const b=state.map[k];
+    if(b.type==='grod') d+=(hasTech('palisada')?3:2)*b.level;
+    if(b.type==='zamek') d+=(hasTech('mury')?7:4)*b.level;
+  }
+  if(hasTech('straz')) d=Math.round(d*1.4);
+  if(hasTech('rycerstwo')) d=Math.round(d*1.5);
+  return d;
+}
+
+// ---- OSIĄGNIĘCIA ----
+const ACHIEVEMENTS = [
+  { id:'first_build', icon:'🏠', name:'Pierwszy Dom',    desc:'Postaw budynek',          check:()=>state.stats.built>=1, reward:{gold:50} },
+  { id:'build10',     icon:'🏘️', name:'Osada',           desc:'Postaw 10 budynków',      check:()=>state.stats.built>=10, reward:{gold:150} },
+  { id:'build50',     icon:'🏙️', name:'Metropolia',      desc:'Postaw 50 budynków',      check:()=>state.stats.built>=50, reward:{know:80} },
+  { id:'lumberjack',  icon:'🪓', name:'Drwal',           desc:'Wykarczuj 10 lasów',      check:()=>state.stats.cleared>=10, reward:{wood:50} },
+  { id:'deforest',    icon:'🌲', name:'Pan Puszczy',     desc:'Wykarczuj 50 lasów',      check:()=>state.stats.cleared>=50, reward:{wood:300} },
+  { id:'pop100',      icon:'👥', name:'Ludna Osada',     desc:'100 mieszkańców',         check:()=>state.pop>=100, reward:{gold:200} },
+  { id:'pop500',      icon:'🏛️', name:'Wielki Gród',     desc:'500 mieszkańców',         check:()=>state.pop>=500, reward:{know:50} },
+  { id:'pop2000',     icon:'🌆', name:'Stolica',         desc:'2000 mieszkańców',        check:()=>state.pop>=2000, reward:{gold:3000} },
+  { id:'gold1k',      icon:'🪙', name:'Pierwszy Tysiąc',desc:'1 tys. grosza',           check:()=>state.gold>=1000, reward:{wood:50} },
+  { id:'gold10k',     icon:'💰', name:'Bogacz',          desc:'10 tys. grosza',          check:()=>state.gold>=10000, reward:{know:30} },
+  { id:'gold100k',    icon:'👑', name:'Skarbiec Króla',  desc:'100 tys. grosza',         check:()=>state.gold>=100000, reward:{know:200} },
+  { id:'castle',      icon:'🏰', name:'Pan na Zamku',    desc:'Zbuduj Zamek',            check:()=>hasBuilding('zamek'), reward:{gold:500} },
+  { id:'castle5',     icon:'🏰', name:'Sieć Zamków',     desc:'5 Zamków',                check:()=>countBuilding('zamek')>=5, reward:{know:150} },
+  { id:'sea',         icon:'⚓', name:'Władca Mórz',     desc:'Zbuduj Port',             check:()=>hasBuilding('port'), reward:{gold:300} },
+  { id:'miner',       icon:'⛏️', name:'Górnik',          desc:'Zbuduj Kopalnię',         check:()=>hasBuilding('kopalnia'), reward:{wood:100} },
+  { id:'faith',       icon:'✝️', name:'Krzewiciel Wiary',desc:'Zbuduj Kościół',          check:()=>hasBuilding('kosciol'), reward:{know:20} },
+  { id:'monastery',   icon:'⛪', name:'Skryptorium',     desc:'Zbuduj Klasztor',         check:()=>hasBuilding('klasztor'), reward:{know:40} },
+  { id:'explorer',    icon:'🗺️', name:'Odkrywca',        desc:'Wykup 10 ziem',           check:()=>state.plotsBought>=10, reward:{gold:1000} },
+  { id:'empire',      icon:'🌍', name:'Imperium',        desc:'Wykup 25 ziem',           check:()=>state.plotsBought>=25, reward:{know:300} },
+  { id:'mountains',   icon:'⛰️', name:'Zdobywca Gór',    desc:'Dotrzyj w góry (kopalnia)',check:()=>hasBuilding('kopalnia'), reward:{gold:400} },
+  { id:'scholar',     icon:'📜', name:'Uczony',          desc:'Odblokuj 5 technologii',  check:()=>Object.keys(state.tech).length>=5, reward:{know:100} },
+  { id:'sage',        icon:'🧙', name:'Mędrzec',         desc:'Odblokuj 10 technologii', check:()=>Object.keys(state.tech).length>=10, reward:{know:250} },
+  { id:'allsci',      icon:'🎓', name:'Wszechwiedza',    desc:'Odblokuj wszystkie techy',check:()=>Object.keys(state.tech).length>=20, reward:{gold:10000} },
+  { id:'levelup',     icon:'⭐', name:'Mistrz Budowy',   desc:'Budynek na poziomie 10',  check:()=>maxBuildingLevel()>=10, reward:{know:100} },
+  { id:'level20',     icon:'🌟', name:'Legenda',         desc:'Budynek na poziomie 20',  check:()=>maxBuildingLevel()>=20, reward:{gold:5000} },
+  { id:'raid1',       icon:'🛡️', name:'Obrońca',         desc:'Przetrwaj najazd',        check:()=>state.stats.raidsSurvived>=1, reward:{gold:300} },
+  { id:'raid10',      icon:'⚔️', name:'Niezłomny',       desc:'Przetrwaj 10 najazdów',   check:()=>state.stats.raidsSurvived>=10, reward:{know:200} },
+  { id:'events',      icon:'📋', name:'Mąż Stanu',       desc:'Rozstrzygnij 15 wydarzeń',check:()=>state.stats.eventsHandled>=15, reward:{know:150} },
+  { id:'king',        icon:'👑', name:'Koronacja',       desc:'Osiągnij tytuł Króla',    check:()=>prestigeLevel().idx>=3, reward:{gold:2000} },
+  { id:'emperor',     icon:'🦅', name:'Imperator',       desc:'Najwyższy tytuł',         check:()=>prestigeLevel().idx>=4, reward:{gold:20000} },
+  { id:'year1100',    icon:'⏳', name:'Wiek Złoty',      desc:'Dotrwaj do roku 1100',    check:()=>state.year>=1100, reward:{know:100} },
+  { id:'year1250',    icon:'📅', name:'Dziedzictwo',     desc:'Dotrwaj do roku 1250',    check:()=>state.year>=1250, reward:{gold:8000} },
+];
+function hasBuilding(type){ for(const k in state.map) if(state.map[k].type===type) return true; return false; }
+function countBuilding(type){ let c=0; for(const k in state.map) if(state.map[k].type===type)c++; return c; }
+function maxBuildingLevel(){ let m=0; for(const k in state.map) m=Math.max(m,state.map[k].level); return m; }
+
+// ---- PRESTIŻ i TYTUŁY ----
+const TITLES = [
+  { name:'WÓDZ',    icon:'🪓', min:0 },
+  { name:'KSIĄŻĘ',  icon:'🛡️', min:150 },
+  { name:'WŁADCA',  icon:'⚔️', min:500 },
+  { name:'KRÓL',    icon:'👑', min:1200 },
+  { name:'IMPERATOR',icon:'🦅', min:3000 },
+];
+function prestige(){
+  let p=0;
+  for(const k in state.map){ const b=state.map[k],bd=BUILDINGS[b.type];
+    if(b.type==='kosciol') p+=8*b.level;
+    if(b.type==='klasztor') p+=12*b.level;
+    if(b.type==='grod') p+=10*b.level;
+    if(b.type==='zamek') p+=25*b.level;
+    p+=b.level; // każdy budynek trochę
+  }
+  p+=Math.floor(state.pop/5);
+  p+=Object.keys(state.tech).length*15;
+  return Math.round(p);
+}
+function prestigeLevel(){
+  let p=prestige(); if(hasTech('kronikarze'))p*=2; let idx=0;
+  for(let i=0;i<TITLES.length;i++) if(p>=TITLES[i].min) idx=i;
+  return { idx, title:TITLES[idx], next:TITLES[idx+1]||null, p };
+}
+
+// ---- SEZONY ----
+const SEASONS=[
+  { name:'Wiosna', icon:'🌱', tint:'rgba(120,200,90,0.10)', food:1.1, income:1.0 },
+  { name:'Lato',   icon:'☀️', tint:'rgba(255,220,80,0.08)', food:1.3, income:1.1 },
+  { name:'Jesień', icon:'🍂', tint:'rgba(200,120,40,0.12)', food:1.0, income:1.2 },
+  { name:'Zima',   icon:'❄️', tint:'rgba(180,210,255,0.14)', food:0.5, income:0.85 },
+];
+function season(){ return SEASONS[Math.floor((state.month%12)/3)%4]; }
+function seasonFoodMult(){ let m=season().food; if(m<1 && hasTech('spichlerze'))m=1; return m; }
+function seasonIncomeMult(){ return season().income; }
+
+// ---- ŁAŃCUCHY PRODUKCJI (premia za sąsiedztwo) ----
+// pary: [typ, sąsiad, bonus do dochodu typu]
+const SYNERGY={ mlyn:['pole',0.5], kuznia:['kopalnia',0.6], targ:['port',0.4], port:['targ',0.3], klasztor:['kosciol',0.4], piekarnia:['mlyn',0.5] };
+function neighbors(gx,gy){ return [[gx+1,gy],[gx-1,gy],[gx,gy+1],[gx,gy-1]]; }
+function synergyMult(gx,gy,type){
+  const syn=SYNERGY[type]; if(!syn) return 1;
+  const [need,bonus]=syn;
+  for(const [nx,ny] of neighbors(gx,gy)){ const nb=state.map[`${nx},${ny}`]; if(nb&&nb.type===need) return 1+bonus; }
+  return 1;
+}
+function hasSynergy(gx,gy,type){ const syn=SYNERGY[type]; if(!syn)return false; for(const [nx,ny] of neighbors(gx,gy)){const nb=state.map[`${nx},${ny}`]; if(nb&&nb.type===syn[0])return true;} return false; }
+
+// ---- WYDARZENIA ----
+const EVENTS=[
+  { id:'harvest', icon:'🌾', title:'Obfite Żniwa', text:'Łaskawy rok obrodził plonami. Spichlerze pełne!', good:true,
+    options:[{label:'Chwała Bogu!', apply:()=>{ state.gold+=Math.round(incomeRaw()*3); notify('Skarbiec wzbogacony!'); }}] },
+  { id:'merchant', icon:'🧳', title:'Kupcy z Zachodu', text:'Przybyli kupcy oferują korzystny handel — albo zostają na dłużej za opłatą.',
+    options:[
+      {label:'Handluj (+grosz)', apply:()=>{ state.gold+=Math.round(200+state.plotsBought*80); notify('Zysk z handlu!'); }},
+      {label:'Zaproś na stałe (-grosz, +wiedza)', apply:()=>{ const c=300; if(state.gold>=c){state.gold-=c;state.know+=40;notify('Kupcy osiedli, niosą wieści.');} else notify('Brak grosza!',true); }}
+    ] },
+  { id:'plague', icon:'🦠', title:'Zaraza', text:'Mór dotknął lud. Możesz wezwać medyków albo zdać się na los.', bad:true,
+    options:[
+      {label:'Wezwij medyków (-grosz)', apply:()=>{ const c=Math.round(300+state.pop); if(state.gold>=c){state.gold-=c;notify('Medycy powstrzymali zarazę.');} else { killPop(0.2); notify('Brak grosza! Lud cierpi.',true);} }},
+      {label:'Zdaj się na los', apply:()=>{ killPop(0.15); notify('Zaraza zebrała żniwo...',true); }}
+    ] },
+  { id:'drought', icon:'🏜️', title:'Susza', text:'Pola usychają. Brak deszczu uderza w żywność.', bad:true,
+    options:[
+      {label:'Racjonuj zapasy (-grosz)', apply:()=>{ const c=250; if(state.gold>=c){state.gold-=c;notify('Przetrwaliście suszę.');} else notify('Brak grosza na ratunek!',true); }},
+      {label:'Przeczekaj', apply:()=>{ state.gold=Math.round(state.gold*0.85); notify('Susza zubożyła skarbiec.',true); }}
+    ] },
+  { id:'pilgrims', icon:'🙏', title:'Pielgrzymi', text:'Grupa pielgrzymów prosi o gościnę w drodze do świętego miejsca.',
+    options:[
+      {label:'Przyjmij ich (+wiedza)', apply:()=>{ state.know+=30; state.gold=Math.max(0,state.gold-50); notify('Pielgrzymi błogosławią gród.'); }},
+      {label:'Odmów', apply:()=>{ notify('Pielgrzymi odeszli rozczarowani.'); }}
+    ] },
+  { id:'settlers', icon:'👨‍👩‍👧', title:'Osadnicy', text:'Rodziny z sąsiednich ziem chcą się osiedlić w twoim grodzie.',
+    options:[
+      {label:'Przyjmij (+lud)', apply:()=>{ state.pop+=Math.round(20+state.plotsBought*5); notify('Gród się rozrasta!'); }},
+      {label:'Odmów (+grosz)', apply:()=>{ state.gold+=150; notify('Pobrałeś myto za przejazd.'); }}
+    ] },
+];
+function incomeRaw(){ let inc=0; for(const k in state.map){const b=state.map[k];inc+=buildingIncome(b.type,b.level,...k.split(',').map(Number));} return inc; }
+function killPop(frac){ // usuwa część chat proporcjonalnie (symbolicznie obniża pop przez "zniszczenie" - tu obniżamy przez markowanie)
+  // prosto: zmniejsz dochód na chwilę nie ma sensu; realnie usuń losowe chaty
+  const homes=Object.keys(state.map).filter(k=>state.map[k].type==='chata');
+  const toRemove=Math.ceil(homes.length*frac);
+  for(let i=0;i<toRemove&&homes.length;i++){ const idx=Math.floor(Math.random()*homes.length); delete state.map[homes[idx]]; homes.splice(idx,1); }
+  recalc();
+}
+let pendingEvent=null;
+function maybeEvent(){
+  // co ~8-14 lat losowe wydarzenie
+  if(state.year-state.lastEventYear < 8) return;
+  if(Math.random()<0.4){
+    state.lastEventYear=state.year;
+    const ev=EVENTS[Math.floor(Math.random()*EVENTS.length)];
+    showEvent(ev);
+  }
+}
+function maybeRaid(){
+  // najazdy zależne od bogactwa, od roku ~1000
+  if(state.year<1000) return;
+  if(state.year-state.lastEventYear < 6) return;
+  const wealth=state.gold+state.pop*5;
+  let chance=0.12; if(hasTech('rycerstwo'))chance*=0.5;
+  if(wealth>3000 && Math.random()<chance){
+    state.lastEventYear=state.year;
+    triggerRaid();
+  }
+}
+function triggerRaid(){
+  const def=defenseLevel();
+  const strength=Math.round(10+(state.year-1000)*0.3+state.plotsBought*2);
+  showEvent({
+    icon:'⚔️', title:'NAJAZD!', bad:true,
+    text:`Wrogie wojska u bram! Siła najeźdźców: ${strength}. Twoja obrona: ${def}. ${def>=strength?'Grody powinny odeprzeć atak.':'Obrona może nie wystarczyć!'}`,
+    options:[
+      {label:'Broń grodu!', apply:()=>{
+        if(def>=strength){
+          state.stats.raidsSurvived++;
+          if(hasTech('choragiew')){ const loot=Math.round(strength*30); state.gold+=loot; notify(`Najazd odparty! Łup: ${loot}🪙`); }
+          else notify('Najazd odparty! Gród ocalał.');
+        } else {
+          const loss=Math.round((strength-def)/strength * 0.3 * (1-(hasTech('straz')?0.3:0)));
+          const before=state.gold; state.gold=Math.round(state.gold*(1-loss));
+          killPop(loss*0.5);
+          notify(`Gród splądrowany! Straty: ${fmt(before-state.gold)}🪙`,true);
+          state.stats.raidsSurvived++; // i tak przetrwałeś
+        }
+        checkAchievements();
+      }}
+    ]
+  });
+}
+function showEvent(ev){
+  pendingEvent=ev;
+  document.getElementById('ev-icon').textContent=ev.icon;
+  document.getElementById('ev-title').textContent=ev.title;
+  document.getElementById('ev-text').textContent=ev.text;
+  const box=document.getElementById('ev-options'); box.innerHTML='';
+  ev.options.forEach(opt=>{ const b=document.createElement('button'); b.className='ev-opt'; b.textContent=opt.label; b.onclick=()=>{ opt.apply(); state.stats.eventsHandled++; closeEvent(); checkAchievements(); updateUI(); autoSave(); }; box.appendChild(b); });
+  document.getElementById('event').classList.add('show');
+  SFX.land(); vibrate(ev.bad?[60,40,60]:40);
+  // pauza gry podczas decyzji
+}
+function closeEvent(){ document.getElementById('event').classList.remove('show'); pendingEvent=null; }
+
+
+function freshState(){ return { gold:120, wood:80, know:0, pop:0, food:0, map:{}, cleared:{}, year:966, month:0, speed:1, ownedPlots:{'0,0':true}, plotsBought:1, tech:{}, ach:{}, stats:{built:0,cleared:0,upgrades:0,plotsBought:0,peakGold:120,peakPop:0,raidsSurvived:0,eventsHandled:0}, lastEventYear:966 }; }
 let state = freshState();
 let camX=0, camY=0, camStartX=0, camStartY=0;
 let dragging=false, dragMoved=false, zoom=0.6;
 let selectedBuild=null, selectedTile=null, axeMode=false;
 let canvas, ctx, W, H, dpr, hover=null, canvasRect=null;
 let gameLoop=null, started=false;
+let achQueue=[], achShowing=false;
 let pinchPrev=0, pinchCx=0, pinchCy=0;
 
 // =====================================================================
@@ -253,7 +573,7 @@ let saveTimer=null;
 function autoSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveGame(false),600); }
 function resetGame(){
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
-  state=freshState(); camX=0; camY=0; zoom=0.6; started=false; unlockedSet={}; terrainCache={};
+  state=freshState(); camX=0; camY=0; started=false; unlockedSet={}; terrainCache={}; achQueue=[]; achShowing=false; pendingEvent=null; closeEvent(); zoom=clampZoom(0.6);
   notify('Nowa gra!'); recalc(); updateUI();
   document.getElementById('reset-btn').style.display='none';
   document.getElementById('start-btn').textContent='⚔ ZAŁÓŻ OSADĘ';
@@ -357,9 +677,11 @@ function drawPlotMarkers(){
 function render(){
   ctx.clearRect(0,0,W,H); ctx.fillStyle='#0e0a12'; ctx.fillRect(0,0,W,H);
   const tl=screenToGrid(-1,-1), br=screenToGrid(W+1,H+1);
-  for(let gy=tl.gy;gy<=br.gy;gy++)for(let gx=tl.gx;gx<=br.gx;gx++){ drawTerrainTile(gx,gy); const b=state.map[`${gx},${gy}`]; if(b&&fogLevel(gx,gy)===0)drawBuilding(gx,gy,b); }
+  for(let gy=tl.gy;gy<=br.gy;gy++)for(let gx=tl.gx;gx<=br.gx;gx++){ drawTerrainTile(gx,gy); const b=state.map[`${gx},${gy}`]; if(b&&fogLevel(gx,gy)===0){ drawBuilding(gx,gy,b); if(hasSynergy(gx,gy,b.type)){ const {x,y}=gridToScreen(gx,gy); const s=TILE*zoom; ctx.strokeStyle='#5ad06a'; ctx.lineWidth=2*zoom; ctx.setLineDash([4*zoom,3*zoom]); ctx.strokeRect(x+1,y+1,s-2,s-2); ctx.setLineDash([]); ctx.fillStyle='#5ad06a'; ctx.font=`${11*zoom}px serif`; ctx.textAlign='center'; ctx.fillText('🔗',x+s-8*zoom,y+10*zoom); ctx.textAlign='start'; } } }
   drawPlotMarkers();
   if(hover&&(selectedBuild||axeMode)){ const {x,y}=gridToScreen(hover.gx,hover.gy); const s=TILE*zoom; let ok=axeMode?canClear(hover.gx,hover.gy):canPlace(hover.gx,hover.gy); ctx.fillStyle=ok?(axeMode?'rgba(74,124,63,0.45)':'rgba(201,162,39,0.4)'):'rgba(139,35,50,0.4)'; ctx.fillRect(x,y,s,s); ctx.strokeStyle=ok?'#e6c558':'#b33a4a'; ctx.lineWidth=2*zoom; ctx.strokeRect(x,y,s,s); }
+  // nakładka koloru sezonu
+  const se=season(); ctx.fillStyle=se.tint; ctx.fillRect(0,0,W,H);
   requestAnimationFrame(render);
 }
 
@@ -367,7 +689,7 @@ function render(){
 //  ACTIONS
 // =====================================================================
 function canClear(gx,gy){ if(!plotOwned(gx,gy))return false; const t=getTerrain(gx,gy); return t.type==='forest'&&!state.map[`${gx},${gy}`]; }
-function clearForest(gx,gy){ if(!canClear(gx,gy)){ notify('Tu nie ma lasu!',true); SFX.error(); return; } const w=20; state.cleared[`${gx},${gy}`]=true; delete terrainCache[`${gx},${gy}`]; state.wood+=w; notify(`Las wykarczowany! +${w}🪵`); SFX.chop(); vibrate(50); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`+${w}🪵`,'#a0d060'); updateUI(); autoSave(); }
+function clearForest(gx,gy){ if(!canClear(gx,gy)){ notify('Tu nie ma lasu!',true); SFX.error(); return; } const w=20; state.cleared[`${gx},${gy}`]=true; delete terrainCache[`${gx},${gy}`]; state.wood+=w; state.stats.cleared++; notify(`Las wykarczowany! +${w}🪵`); SFX.chop(); vibrate(50); checkAchievements(); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`+${w}🪵`,'#a0d060'); updateUI(); autoSave(); }
 function canPlace(gx,gy){ if(!plotOwned(gx,gy))return false; const t=getTerrain(gx,gy); const bd=BUILDINGS[selectedBuild]; if(!bd)return false; if(state.map[`${gx},${gy}`])return false; if(bd.needsWater)return t.type==='water'; if(bd.needsMountain)return t.type==='mountain'; if(t.type==='water'||t.type==='mountain')return false; if(t.type==='forest')return false; return true; }
 function placeBuilding(gx,gy){
   const bd=BUILDINGS[selectedBuild];
@@ -375,10 +697,11 @@ function placeBuilding(gx,gy){
   const t=getTerrain(gx,gy);
   if(t.type==='forest'){ notify('Najpierw wykarczuj las! 🪓',true); return; }
   if(!canPlace(gx,gy)){ if(bd.needsWater)notify('Port buduj na wodzie! 🌊',true); else if(bd.needsMountain)notify('Kopalnię buduj w górach! ⛰️',true); else notify('Nie można tu budować!',true); return; }
-  if(state.gold<bd.cost){ notify(`Brakuje grosza! (${bd.cost}🪙)`,true); return; }
-  if(state.wood<bd.wood){ notify(`Brakuje drewna! (${bd.wood}🪵)`,true); return; }
-  state.gold-=bd.cost; state.wood-=bd.wood; state.map[`${gx},${gy}`]={type:selectedBuild,level:1};
-  recalc(); notify(`${bd.name} wzniesiona!`); SFX.build(); vibrate(40); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`-${bd.cost}🪙`,'#b33a4a'); updateUI(); autoSave();
+  if(state.gold<bd.cost){ notify(`Brakuje grosza! (${bd.cost}🪙)`,true); SFX.error(); return; }
+  const woodCost=hasTech('ciesielstwo')?Math.ceil(bd.wood*0.75):bd.wood;
+  if(state.wood<woodCost){ notify(`Brakuje drewna! (${woodCost}🪵)`,true); SFX.error(); return; }
+  state.gold-=bd.cost; state.wood-=woodCost; state.map[`${gx},${gy}`]={type:selectedBuild,level:1}; state.stats.built++;
+  recalc(); notify(`${bd.name} wzniesiona!`); SFX.build(); vibrate(40); checkAchievements(); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`-${bd.cost}🪙`,'#b33a4a'); updateUI(); autoSave();
 }
 function tryBuyPlot(gx,gy){
   const px=Math.floor(gx/PLOT),py=Math.floor(gy/PLOT),key=`${px},${py}`;
@@ -387,25 +710,50 @@ function tryBuyPlot(gx,gy){
   if(!adj){ notify('Kupuj tylko ziemię obok swojej!',true); return true; }
   const cost=plotCost();
   if(state.gold<cost){ notify(`Brakuje grosza (${fmt(cost)}🪙)`,true); return true; }
-  state.gold-=cost; state.ownedPlots[key]=true; state.plotsBought++; notify('Nowa kraina odkryta! 🗺️'); SFX.land(); vibrate(60);
+  state.gold-=cost; state.ownedPlots[key]=true; state.plotsBought++; state.stats.plotsBought++; notify('Nowa kraina odkryta! 🗺️'); SFX.land(); vibrate(60); checkAchievements();
   const sc=gridToScreen(px*PLOT+PLOT/2,py*PLOT+PLOT/2); floatText(sc.x,sc.y,`-${fmt(cost)}🪙`,'#b33a4a'); updateUI(); autoSave(); return true;
 }
 
 // =====================================================================
 //  ECONOMY
 // =====================================================================
-function recalc(){ let pop=0,food=0; for(const k in state.map){const b=state.map[k],bd=BUILDINGS[b.type];pop+=bd.pop*b.level;food+=bd.food*b.level;} state.pop=pop; state.food=food; }
-function incomePerYear(){ let inc=0; for(const k in state.map){const b=state.map[k],bd=BUILDINGS[b.type];inc+=bd.income*b.level;} inc+=state.pop*1; if(state.food<0)inc*=0.4; return Math.round(inc); }
+function recalc(){ let pop=0,food=0; for(const k in state.map){const b=state.map[k],bd=BUILDINGS[b.type];pop+=bd.pop*b.level; let f=bd.food*b.level; if(b.type==='pole'&&hasTech('plodozmian'))f*=1.5; if(b.type==='klasztor'&&hasTech('sady')&&f>0)f*=1.5; food+=f;} 
+  food=food*seasonFoodMult(); state.pop=pop; state.food=Math.round(food);
+  if(pop>state.stats.peakPop)state.stats.peakPop=pop; }
+function buildingIncome(type,level,gx,gy){
+  const bd=BUILDINGS[type]; let inc=bd.income*level;
+  if(type==='mlyn'&&hasTech('mlynarstwo')) inc*=1.5;
+  if(type==='kuznia'&&hasTech('kowalstwo')) inc*=1.6;
+  if((type==='targ'||type==='port')&&hasTech('handel')) inc*=1.5;
+  if(type==='pole'&&hasTech('nawadnianie')) inc*=1.5;
+  if(type==='kopalnia'&&hasTech('gornictwo')) inc*=1.8;
+  if(hasTech('cechy')) inc*=1.2;
+  if(gx!==undefined) inc*=synergyMult(gx,gy,type); // łańcuch produkcji
+  return inc;
+}
+function incomePerYear(){ let inc=0; for(const k in state.map){const b=state.map[k];const [gx,gy]=k.split(',').map(Number);inc+=buildingIncome(b.type,b.level,gx,gy);}
+  let popBonus=state.pop*1; if(hasTech('prawo')) popBonus*=1.3; inc+=popBonus;
+  inc*=seasonIncomeMult();
+  if(state.food<0)inc*=0.4; return Math.round(inc); }
 function woodPerYear(){ let w=0; for(const k in state.map){const b=state.map[k];if(b.type==='klasztor'||b.type==='grod')w+=2*b.level;} return w; }
+function knowPerYear(){ let kn=0; for(const k in state.map){const b=state.map[k];if(b.type==='kosciol')kn+=1*b.level;if(b.type==='klasztor')kn+=3*b.level;} if(hasTech('pismo'))kn*=1.5; if(hasTech('uniwersytet'))kn*=2; return Math.round(kn); }
 let tickCount=0;
 function tick(){
-  state.gold+=incomePerYear(); state.wood+=woodPerYear(); state.year++;
+  if(pendingEvent) return; // gra wstrzymana podczas decyzji
+  state.month+=3; // kwartał na tick = 4 ticki na rok
+  const newYear = state.month>=12;
+  if(newYear){ state.month-=12; state.year++; }
+  state.gold+=Math.round(incomePerYear()/4); state.wood+=woodPerYear(); state.know+=knowPerYear();
+  if(state.gold>state.stats.peakGold)state.stats.peakGold=state.gold;
+  recalc(); // sezon wpływa na żywność
   const keys=Object.keys(state.map);
-  if(keys.length){const rk=keys[Math.floor(Math.random()*keys.length)];const [gx,gy]=rk.split(',').map(Number);if(fogLevel(gx,gy)===0){const sc=gridToScreen(gx,gy);const b=state.map[rk];floatText(sc.x+TILE*zoom/2,sc.y,`+${BUILDINGS[b.type].income*b.level}🪙`);}}
+  if(keys.length){const rk=keys[Math.floor(Math.random()*keys.length)];const [gx,gy]=rk.split(',').map(Number);if(fogLevel(gx,gy)===0){const sc=gridToScreen(gx,gy);const b=state.map[rk];floatText(sc.x+TILE*zoom/2,sc.y,`+${Math.round(buildingIncome(b.type,b.level,gx,gy)/4)}🪙`);}}
   if(state.food<0&&Math.random()<0.3) notify('⚠ Głód! Zbuduj pola.',true);
-  if(Object.keys(state.map).length>0 && tickCount%3===0) SFX.coin();
+  if(keys.length>0 && tickCount%3===0) SFX.coin();
+  if(newYear){ maybeRaid(); if(!pendingEvent) maybeEvent(); }
+  checkAchievements();
   updateUI();
-  if(++tickCount%4===0) saveGame(false); // autosave every 4 years
+  if(++tickCount%4===0) saveGame(false);
 }
 
 // =====================================================================
@@ -415,8 +763,11 @@ function updateUI(){
   document.getElementById('r-gold').textContent=fmt(state.gold);
   document.getElementById('r-gold-rate').textContent=`+${fmt(incomePerYear())}/rok`;
   document.getElementById('r-wood').textContent=fmt(state.wood);
+  document.getElementById('r-know').textContent=fmt(state.know);
   document.getElementById('r-pop').textContent=fmt(state.pop);
   const fe=document.getElementById('r-food'); fe.textContent=(state.food>=0?'+':'')+fmt(state.food); fe.style.color=state.food<0?'#e06a6a':'#e6c558'; document.getElementById('r-food-sub').textContent=state.food<0?'⚠ głód!':'żywność';
+  const pl=prestigeLevel(); document.getElementById('title-icon').textContent=pl.title.icon; document.getElementById('title-name').textContent=pl.title.name;
+  const se=season(); document.getElementById('season-ind').textContent=`${se.icon} ${se.name} ${state.year}`;
   renderBuildBar();
 }
 function renderBuildBar(){
@@ -429,7 +780,7 @@ function renderBuildBar(){
 function updateAxe(axe){ axe.classList.toggle('selected',axeMode); }
 let unlockedSet={};
 function hasUnlocked(type){ if(unlockedSet[type])return true; if(state.gold>=BUILDINGS[type].unlock){unlockedSet[type]=true;return true;} return false; }
-function updateCard(card,type){ const bd=BUILDINGS[type]; const locked=state.gold<bd.unlock&&!hasUnlocked(type); card.classList.toggle('locked',locked); card.classList.toggle('selected',selectedBuild===type); const c=card.querySelector('.card-cost'); if(locked)c.innerHTML=`<span class="card-lock">🔒 ${fmt(bd.unlock)}🪙</span>`; else c.innerHTML=`${fmt(bd.cost)}🪙 ${bd.wood}🪵<div class="card-income">+${bd.income}/r</div>`; }
+function updateCard(card,type){ const bd=BUILDINGS[type]; const locked=state.gold<bd.unlock&&!hasUnlocked(type); card.classList.toggle('locked',locked); card.classList.toggle('selected',selectedBuild===type); const c=card.querySelector('.card-cost'); if(locked)c.innerHTML=`<span class="card-lock">🔒 ${fmt(bd.unlock)}🪙</span>`; else { const wc=hasTech('ciesielstwo')?Math.ceil(bd.wood*0.75):bd.wood; c.innerHTML=`${fmt(bd.cost)}🪙 ${wc}🪵<div class="card-income">+${bd.income}/r</div>`; } }
 function miniIcon(c,type){
   const x=4,y=4,s=36,cx=x+s/2,cy=y+s/2;
   function roof(c1,c2,ins){const p=s*ins;c.fillStyle=c2;c.fillRect(x+p,y+p,s-p*2,s-p*2);c.fillStyle=c1;c.beginPath();c.moveTo(x+p,y+p);c.lineTo(x+s-p,y+p);c.lineTo(cx,cy);c.fill();c.fillStyle=shade(c1,-0.15);c.beginPath();c.moveTo(x+p,y+s-p);c.lineTo(x+s-p,y+s-p);c.lineTo(cx,cy);c.fill();c.fillStyle=shade(c2,-0.1);c.beginPath();c.moveTo(x+p,y+p);c.lineTo(x+p,y+s-p);c.lineTo(cx,cy);c.fill();c.fillStyle=shade(c2,0.05);c.beginPath();c.moveTo(x+s-p,y+p);c.lineTo(x+s-p,y+s-p);c.lineTo(cx,cy);c.fill();}
@@ -449,9 +800,9 @@ function miniIcon(c,type){
   }
 }
 function selectBuild(type){ const bd=BUILDINGS[type]; if(state.gold<bd.unlock&&!hasUnlocked(type)){notify(`Odblokuj za ${fmt(bd.unlock)}🪙`,true);return;} selectedBuild=(selectedBuild===type)?null:type; axeMode=false; closeInfo(); updateUI(); }
-function openInfo(key){ selectedTile=key; const b=state.map[key],bd=BUILDINGS[b.type]; document.getElementById('ip-title').textContent=bd.name; const tier=Math.floor((b.level-1)/5); const tn=['','Złoty ','Mistrzowski ','Królewski ','Legendarny '][Math.min(tier,4)]; document.getElementById('ip-lvl').textContent=`${tn}Poziom ${b.level}`; document.getElementById('ip-desc').textContent=bd.desc; document.getElementById('ip-income').textContent=bd.income*b.level; document.getElementById('ip-pop-stat').innerHTML=bd.pop?`Ludność: <b>+${bd.pop*b.level}</b>`:(bd.food?`Żywność: <b>${bd.food>0?'+':''}${bd.food*b.level}</b>`:''); const up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level)); document.getElementById('ip-upgrade').innerHTML=`⬆ Rozbuduj<br><small>${fmt(up)}🪙</small>`; const ic=document.getElementById('ip-icon'); ic.innerHTML='<canvas width="40" height="40"></canvas>'; miniIcon(ic.querySelector('canvas').getContext('2d'),b.type); document.getElementById('info-panel').classList.add('show'); }
+function openInfo(key){ selectedTile=key; const b=state.map[key],bd=BUILDINGS[b.type]; const [gx,gy]=key.split(',').map(Number); document.getElementById('ip-title').textContent=bd.name; const tier=Math.floor((b.level-1)/5); const tn=['','Złoty ','Mistrzowski ','Królewski ','Legendarny '][Math.min(tier,4)]; document.getElementById('ip-lvl').textContent=`${tn}Poziom ${b.level}`; let desc=bd.desc; if(hasSynergy(gx,gy,b.type))desc+=' 🔗 Łańcuch aktywny!'; document.getElementById('ip-desc').textContent=desc; document.getElementById('ip-income').textContent=Math.round(buildingIncome(b.type,b.level,gx,gy)); document.getElementById('ip-pop-stat').innerHTML=bd.pop?`Ludność: <b>+${bd.pop*b.level}</b>`:(bd.food?`Żywność: <b>${bd.food>0?'+':''}${bd.food*b.level}</b>`:''); let up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level)); if(hasTech('mecenat'))up=Math.round(up*0.8); document.getElementById('ip-upgrade').innerHTML=`⬆ Rozbuduj<br><small>${fmt(up)}🪙</small>`; const ic=document.getElementById('ip-icon'); ic.innerHTML='<canvas width="40" height="40"></canvas>'; miniIcon(ic.querySelector('canvas').getContext('2d'),b.type); document.getElementById('info-panel').classList.add('show'); }
 function closeInfo(){ document.getElementById('info-panel').classList.remove('show'); selectedTile=null; }
-function doUpgrade(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];const up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level));if(state.gold<up){notify('Brakuje grosza!',true);SFX.error();return;}state.gold-=up;b.level++;recalc();notify(`${bd.name} → poziom ${b.level}!`);SFX.upgrade();vibrate(40);openInfo(selectedTile);updateUI();autoSave(); }
+function doUpgrade(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];let up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level));if(hasTech('mecenat'))up=Math.round(up*0.8);if(state.gold<up){notify('Brakuje grosza!',true);SFX.error();return;}state.gold-=up;b.level++;state.stats.upgrades++;recalc();notify(`${bd.name} → poziom ${b.level}!`);SFX.upgrade();vibrate(40);checkAchievements();openInfo(selectedTile);updateUI();autoSave(); }
 function doDemolish(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];const ref=Math.round(bd.cost*0.4*b.level);state.gold+=ref;delete state.map[selectedTile];recalc();notify(`Zburzono. Odzyskano ${fmt(ref)}🪙`);closeInfo();updateUI();autoSave(); }
 function fmt(n){ n=Math.round(n); if(n>=1e6)return(n/1e6).toFixed(1)+'mln'; if(n>=1e3)return(n/1e3).toFixed(1)+'tys'; return''+n; }
 let notifT; function notify(msg,err=false){const n=document.getElementById('notif');n.textContent=msg;n.className='show'+(err?' err':'');clearTimeout(notifT);notifT=setTimeout(()=>n.className=err?'err':'',1800);}
@@ -620,7 +971,9 @@ const TUT_STEPS=[
   { icon:'🪓', title:'Karczuj las', text:'Drewno zdobywasz wycinając lasy. Wybierz zielone narzędzie 🪓 i dotknij lasu na swojej ziemi — dostaniesz drewno i odsłonisz pole pod budowę.' },
   { icon:'🪙', title:'Zarabiaj', text:'Budynki co rok dają grosz. Targowiska i porty zarabiają najwięcej. Uwaga na żywność 🌾 — gdy spadnie poniżej zera, lud głoduje i dochód maleje!' },
   { icon:'🗺️', title:'Zdobywaj ziemie', text:'Złote pola obok Twoich gruntów możesz wykupić. Każda kolejna ziemia jest droższa, ale odsłania nowe krainy: puszcze, rzeki, góry i morze.' },
-  { icon:'⬆️', title:'Rozbudowuj', text:'Dotknij swojego budynku, by go ulepszyć. Wyższe poziomy = większy dochód, a gwiazdki zmieniają kolor co 5 poziomów. Powodzenia, Władco!' },
+  { icon:'⬆️', title:'Rozbudowuj', text:'Dotknij swojego budynku, by go ulepszyć. Wyższe poziomy = większy dochód, a gwiazdki zmieniają kolor co 5 poziomów.' },
+  { icon:'📜', title:'Rozwój i sława', text:'Kościoły i klasztory dają Wiedzę 📜 — wydawaj ją na technologie (przycisk 📜). Zdobywaj osiągnięcia 🏆 i podnoś prestiż, by awansować z Wodza aż na Imperatora.' },
+  { icon:'🔗', title:'Głębia', text:'Stawiaj budynki obok siebie dla premii (Młyn przy Polu, Kuźnia przy Kopalni — szukaj 🔗). Pilnuj pór roku 🍂 (zima = mało żywności), broń się grodami przed najazdami ⚔️ i mądrze rozstrzygaj wydarzenia. Powodzenia, Władco!' },
 ];
 let tutStep=0, tutSeenKey='grod_tut_seen_v1';
 function showTutorial(force=false){
@@ -637,6 +990,90 @@ function renderTut(){
 }
 function nextTut(){ SFX.click(); vibrate(15); if(tutStep<TUT_STEPS.length-1){ tutStep++; renderTut(); } else endTutorial(); }
 function endTutorial(){ document.getElementById('tutorial').classList.remove('show'); try{ localStorage.setItem(tutSeenKey,'1'); }catch(e){} }
+
+// =====================================================================
+//  PROGRESJA — osiągnięcia, technologie, ekran postępu
+// =====================================================================
+function checkAchievements(){
+  for(const a of ACHIEVEMENTS){
+    if(!state.ach[a.id] && a.check()){
+      state.ach[a.id]=true;
+      if(a.reward){ if(a.reward.gold)state.gold+=a.reward.gold; if(a.reward.wood)state.wood+=a.reward.wood; if(a.reward.know)state.know+=a.reward.know; }
+      achQueue.push(a);
+    }
+  }
+  if(achQueue.length && !achShowing) showNextAch();
+}
+function showNextAch(){
+  if(!achQueue.length){ achShowing=false; return; }
+  achShowing=true;
+  const a=achQueue.shift();
+  document.getElementById('at-icon').textContent=a.icon;
+  let rewardTxt=''; if(a.reward){ if(a.reward.gold)rewardTxt=` +${a.reward.gold}🪙`; else if(a.reward.wood)rewardTxt=` +${a.reward.wood}🪵`; else if(a.reward.know)rewardTxt=` +${a.reward.know}📜`; }
+  document.getElementById('at-name').textContent=a.name+rewardTxt;
+  const t=document.getElementById('ach-toast'); t.classList.add('show');
+  SFX.upgrade(); vibrate([30,40,30]);
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(showNextAch,500); },2600);
+}
+
+function canBuyTech(branch,item){
+  if(state.tech[item.id]) return false;
+  if(item.req && !state.tech[item.req]) return false;
+  return state.know>=item.cost;
+}
+function buyTech(branchKey,itemId){
+  let item=null; for(const b in TECH){ for(const it of TECH[b].items){ if(it.id===itemId)item=it; } }
+  if(!item||state.tech[itemId]) return;
+  if(item.req&&!state.tech[item.req]){ notify('Najpierw odblokuj wcześniejszą technologię!',true); SFX.error(); return; }
+  if(state.know<item.cost){ notify(`Brakuje wiedzy! (${item.cost}📜)`,true); SFX.error(); return; }
+  state.know-=item.cost; state.tech[itemId]=true;
+  notify(`Odkryto: ${item.name}!`); SFX.upgrade(); vibrate(40);
+  recalc(); checkAchievements(); updateUI(); renderProgress(); autoSave();
+}
+
+let progTab='tech';
+function openProgress(){ SFX.click(); progTab='tech'; document.querySelectorAll('.prog-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='tech')); renderProgress(); document.getElementById('progress').classList.add('show'); }
+function closeProgress(){ document.getElementById('progress').classList.remove('show'); }
+function switchTab(tab){ progTab=tab; SFX.click(); document.querySelectorAll('.prog-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab)); renderProgress(); }
+function renderProgress(){
+  const pl=prestigeLevel();
+  document.getElementById('prog-title-icon').textContent=pl.title.icon;
+  document.getElementById('prog-title-name').textContent=pl.title.name;
+  if(pl.next){ const span=pl.next.min-pl.title.min, prog=pl.p-pl.title.min; document.getElementById('prestige-fill').style.width=Math.min(100,prog/span*100)+'%'; document.getElementById('prog-prestige-text').textContent=`Prestiż: ${pl.p} — do tytułu „${pl.next.name}" brakuje ${pl.next.min-pl.p}`; }
+  else { document.getElementById('prestige-fill').style.width='100%'; document.getElementById('prog-prestige-text').textContent=`Prestiż: ${pl.p} — najwyższy tytuł!`; }
+  const c=document.getElementById('prog-content');
+  if(progTab==='tech'){
+    let h='';
+    for(const bk in TECH){ const br=TECH[bk]; h+=`<div class="tech-branch"><div class="tech-branch-title">${br.icon} ${br.label}</div>`;
+      for(const it of br.items){ const owned=!!state.tech[it.id]; const avail=canBuyTech(bk,it); const locked=it.req&&!state.tech[it.req];
+        let btn = owned?`<button class="tech-btn done">✓ Mam</button>` : locked?`<button class="tech-btn lock">🔒 ${it.cost}📜</button>` : `<button class="tech-btn ${avail?'buy':'lock'}" onclick="buyTech('${bk}','${it.id}')">${it.cost}📜</button>`;
+        h+=`<div class="tech-item ${owned?'unlocked':avail?'available':''}"><div class="tech-info"><div class="tech-name">${it.name}</div><div class="tech-desc">${it.desc}</div></div>${btn}</div>`; }
+      h+='</div>'; }
+    c.innerHTML=h;
+  } else if(progTab==='ach'){
+    let got=ACHIEVEMENTS.filter(a=>state.ach[a.id]).length;
+    let h=`<div style="text-align:center;color:#b8a878;font-size:12px;margin-bottom:10px">Zdobyto ${got} z ${ACHIEVEMENTS.length}</div><div class="ach-grid">`;
+    for(const a of ACHIEVEMENTS){ const got=!!state.ach[a.id]; h+=`<div class="ach-item ${got?'got':''}"><div class="ach-ico">${a.icon}</div><div class="ach-name">${a.name}</div><div class="ach-desc">${got?'✓ zdobyte':a.desc}</div></div>`; }
+    h+='</div>'; c.innerHTML=h;
+  } else {
+    const s=state.stats;
+    c.innerHTML=`
+      <div class="stat-line"><span class="sl-label">Rok panowania</span><span class="sl-val">${state.year}</span></div>
+      <div class="stat-line"><span class="sl-label">Budynków postawionych</span><span class="sl-val">${s.built}</span></div>
+      <div class="stat-line"><span class="sl-label">Ulepszeń</span><span class="sl-val">${s.upgrades}</span></div>
+      <div class="stat-line"><span class="sl-label">Lasów wykarczowanych</span><span class="sl-val">${s.cleared}</span></div>
+      <div class="stat-line"><span class="sl-label">Ziem wykupionych</span><span class="sl-val">${state.plotsBought}</span></div>
+      <div class="stat-line"><span class="sl-label">Szczyt grosza</span><span class="sl-val">${fmt(s.peakGold)}🪙</span></div>
+      <div class="stat-line"><span class="sl-label">Szczyt ludności</span><span class="sl-val">${fmt(s.peakPop)}👥</span></div>
+      <div class="stat-line"><span class="sl-label">Technologii odkrytych</span><span class="sl-val">${Object.keys(state.tech).length} / 20</span></div>
+      <div class="stat-line"><span class="sl-label">Dochód roczny</span><span class="sl-val">+${fmt(incomePerYear())}🪙</span></div>
+      <div class="stat-line"><span class="sl-label">Wiedza / rok</span><span class="sl-val">+${fmt(knowPerYear())}📜</span></div>
+      <div class="stat-line"><span class="sl-label">Siła obrony</span><span class="sl-val">${defenseLevel()} 🛡️</span></div>
+      <div class="stat-line"><span class="sl-label">Najazdów przetrwanych</span><span class="sl-val">${state.stats.raidsSurvived}</span></div>
+      <div class="stat-line"><span class="sl-label">Wydarzeń rozstrzygniętych</span><span class="sl-val">${state.stats.eventsHandled}</span></div>
+      <div class="stat-line"><span class="sl-label">Pora roku</span><span class="sl-val">${season().icon} ${season().name}</span></div>`;
+  }
+}
 
 function init(){
   canvas=document.getElementById('game-canvas'); ctx=canvas.getContext('2d');
