@@ -71,6 +71,43 @@
   #intro .start-btn:active { transform:scale(0.96); }
   #intro .reset-btn { font-family:'EB Garamond'; font-size:12px; background:none; border:1px solid #6a5a3a; color:#8a7a5a; border-radius:6px; padding:6px 16px; cursor:pointer; }
   #intro .channel { margin-top:20px; font-size:12px; color:#8a7a5a; font-style:italic; }
+
+  /* SAMOUCZEK */
+  #tutorial { position:absolute; inset:0; z-index:110; background:rgba(10,7,4,0.78); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:24px; }
+  #tutorial.show { display:flex; }
+  .tut-box { background:linear-gradient(165deg,var(--parchment),var(--parchment-dark)); border:3px solid var(--gold); border-radius:14px; padding:24px 22px 18px; max-width:340px; width:100%; text-align:center; box-shadow:0 8px 30px #000; position:relative; }
+  .tut-icon { font-size:46px; margin-bottom:8px; }
+  .tut-title { font-family:'Cinzel'; font-weight:900; font-size:20px; color:var(--crimson); margin-bottom:10px; }
+  .tut-text { font-size:15px; line-height:1.55; color:var(--ink); margin-bottom:16px; min-height:66px; }
+  .tut-dots { display:flex; gap:6px; justify-content:center; margin-bottom:16px; }
+  .tut-dots span { width:8px; height:8px; border-radius:50%; background:#bca878; transition:background .2s; }
+  .tut-dots span.on { background:var(--gold); }
+  .tut-btns { display:flex; gap:10px; }
+  .tut-skip { flex:0 0 auto; background:none; border:1px solid #9a8a6a; color:#7a6a4a; border-radius:8px; padding:10px 16px; font-family:'EB Garamond'; font-size:13px; cursor:pointer; }
+  .tut-next { flex:1; background:linear-gradient(160deg,var(--gold-light),var(--gold)); border:none; color:var(--wood-dark); border-radius:8px; padding:10px; font-family:'Cinzel'; font-weight:700; font-size:14px; cursor:pointer; }
+  .tut-next:active,.tut-skip:active { transform:scale(0.96); }
+
+  /* USTAWIENIA */
+  #settings { position:absolute; inset:0; z-index:115; background:rgba(10,7,4,0.78); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:24px; }
+  #settings.show { display:flex; }
+  .set-box { background:linear-gradient(165deg,#3a2818,#241810); border:3px solid var(--gold); border-radius:14px; padding:22px 20px; max-width:340px; width:100%; box-shadow:0 8px 30px #000; position:relative; }
+  .set-close { position:absolute; top:12px; right:16px; color:var(--gold); font-size:22px; cursor:pointer; line-height:1; }
+  .set-title { font-family:'Cinzel'; font-weight:900; font-size:19px; color:var(--gold-light); margin-bottom:18px; text-align:center; }
+  .set-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px; }
+  .set-label { font-size:14px; color:var(--parchment); }
+  .set-row input[type=range] { flex:1; max-width:150px; accent-color:var(--gold); }
+  .set-divider { height:1px; background:var(--gold); opacity:0.4; margin:16px 0; }
+  .set-action { width:100%; background:linear-gradient(160deg,#4a3a24,#2f2414); border:1px solid var(--gold); color:var(--gold-light); border-radius:8px; padding:11px; font-family:'Cinzel'; font-weight:700; font-size:13px; cursor:pointer; margin-bottom:8px; }
+  .set-action.danger { border-color:var(--crimson-light); color:#e08080; background:linear-gradient(160deg,#3a1818,#2a1010); }
+  .set-action:active { transform:scale(0.97); }
+  .set-hint { font-size:11px; color:#9a8a6a; font-style:italic; line-height:1.5; margin-top:8px; text-align:center; }
+  /* toggle switch */
+  .switch { position:relative; display:inline-block; width:46px; height:26px; flex:0 0 auto; }
+  .switch input { opacity:0; width:0; height:0; }
+  .slider { position:absolute; inset:0; background:#5a4a32; border-radius:26px; transition:.2s; cursor:pointer; }
+  .slider:before { content:''; position:absolute; height:20px; width:20px; left:3px; top:3px; background:#e8dcc0; border-radius:50%; transition:.2s; }
+  .switch input:checked + .slider { background:var(--green); }
+  .switch input:checked + .slider:before { transform:translateX(20px); }
 </style>
 </head>
 <body>
@@ -88,6 +125,7 @@
       <div class="ctrl-btn" onclick="toggleSpeed()" id="speed-btn">⏩</div>
       <div class="ctrl-btn" onclick="centerView()">🎯</div>
       <div class="ctrl-btn" onclick="saveGame(true)" style="font-size:15px">💾</div>
+      <div class="ctrl-btn" onclick="openSettings()" style="font-size:16px">⚙️</div>
     </div>
     <div id="notif"></div>
     <div id="info-panel">
@@ -105,6 +143,56 @@
     <button class="start-btn" id="start-btn" onclick="startGame()">⚔ ZAŁÓŻ OSADĘ</button>
     <button class="reset-btn" id="reset-btn" onclick="resetGame()" style="display:none">🗑 Zacznij od nowa</button>
     <div class="channel">— scenariusz dla kanału „Dzieje TV" —</div>
+  </div>
+
+  <!-- SAMOUCZEK -->
+  <div id="tutorial">
+    <div class="tut-box">
+      <div class="tut-icon" id="tut-icon">🦅</div>
+      <div class="tut-title" id="tut-title">Witaj, Książę!</div>
+      <div class="tut-text" id="tut-text">Tekst</div>
+      <div class="tut-dots" id="tut-dots"></div>
+      <div class="tut-btns">
+        <button class="tut-skip" onclick="endTutorial()">Pomiń</button>
+        <button class="tut-next" id="tut-next" onclick="nextTut()">Dalej →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- USTAWIENIA -->
+  <div id="settings">
+    <div class="set-box">
+      <span class="set-close" onclick="closeSettings()">✕</span>
+      <div class="set-title">⚙️ Ustawienia</div>
+
+      <div class="set-row">
+        <span class="set-label">🎵 Muzyka</span>
+        <label class="switch"><input type="checkbox" id="set-music" onchange="onMusicToggle()"><span class="slider"></span></label>
+      </div>
+      <div class="set-row">
+        <span class="set-label">Głośność muzyki</span>
+        <input type="range" id="set-music-vol" min="0" max="100" value="50" oninput="onMusicVol()">
+      </div>
+
+      <div class="set-row">
+        <span class="set-label">🔊 Dźwięki</span>
+        <label class="switch"><input type="checkbox" id="set-sfx" checked onchange="onSfxToggle()"><span class="slider"></span></label>
+      </div>
+      <div class="set-row">
+        <span class="set-label">Głośność dźwięków</span>
+        <input type="range" id="set-sfx-vol" min="0" max="100" value="60" oninput="onSfxVol()">
+      </div>
+
+      <div class="set-row">
+        <span class="set-label">📳 Wibracje</span>
+        <label class="switch"><input type="checkbox" id="set-vibe" checked onchange="onVibeToggle()"><span class="slider"></span></label>
+      </div>
+
+      <div class="set-divider"></div>
+      <button class="set-action" onclick="closeSettings();showTutorial(true)">📖 Pokaż samouczek</button>
+      <button class="set-action danger" onclick="resetFromSettings()">🗑 Zacznij grę od nowa</button>
+      <div class="set-hint">Muzyka: wrzuć pliki <b>1.mp3, 2.mp3...</b> obok pliku gry — gra losuje je sama.</div>
+    </div>
   </div>
 </div>
 
@@ -157,7 +245,7 @@ function loadGame(){
     if(!raw) return false;
     const d=JSON.parse(raw);
     if(d&&d.state){ state=Object.assign(freshState(),d.state);
-      camX=d.camX||0; camY=d.camY||0; zoom=d.zoom||0.6; started=!!d.started; return true; }
+      camX=d.camX||0; camY=d.camY||0; zoom=clampZoom(d.zoom||0.6); started=!!d.started; return true; }
   } catch(e){ storageOK=false; }
   return false;
 }
@@ -182,6 +270,10 @@ function evToCanvas(e){ const r=canvas.getBoundingClientRect(); return { x:e.cli
 function plotOf(gx,gy){ return `${Math.floor(gx/PLOT)},${Math.floor(gy/PLOT)}`; }
 function plotOwned(gx,gy){ return !!state.ownedPlots[plotOf(gx,gy)]; }
 function plotCost(){ return Math.round(250 * Math.pow(2.1, state.plotsBought-1)); }
+const MAX_ZOOM=1.6;
+// im więcej ziemi, tym dalej można oddalić. 1 działka → 0.55, rośnie wolno
+function minZoom(){ return Math.max(0.12, 0.55 - (state.plotsBought-1)*0.045); }
+function clampZoom(z){ return Math.max(minZoom(), Math.min(MAX_ZOOM, z)); }
 
 // =====================================================================
 //  TERRAIN
@@ -275,7 +367,7 @@ function render(){
 //  ACTIONS
 // =====================================================================
 function canClear(gx,gy){ if(!plotOwned(gx,gy))return false; const t=getTerrain(gx,gy); return t.type==='forest'&&!state.map[`${gx},${gy}`]; }
-function clearForest(gx,gy){ if(!canClear(gx,gy)){ notify('Tu nie ma lasu!',true); return; } const w=20; state.cleared[`${gx},${gy}`]=true; delete terrainCache[`${gx},${gy}`]; state.wood+=w; notify(`Las wykarczowany! +${w}🪵`); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`+${w}🪵`,'#a0d060'); updateUI(); autoSave(); }
+function clearForest(gx,gy){ if(!canClear(gx,gy)){ notify('Tu nie ma lasu!',true); SFX.error(); return; } const w=20; state.cleared[`${gx},${gy}`]=true; delete terrainCache[`${gx},${gy}`]; state.wood+=w; notify(`Las wykarczowany! +${w}🪵`); SFX.chop(); vibrate(50); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`+${w}🪵`,'#a0d060'); updateUI(); autoSave(); }
 function canPlace(gx,gy){ if(!plotOwned(gx,gy))return false; const t=getTerrain(gx,gy); const bd=BUILDINGS[selectedBuild]; if(!bd)return false; if(state.map[`${gx},${gy}`])return false; if(bd.needsWater)return t.type==='water'; if(bd.needsMountain)return t.type==='mountain'; if(t.type==='water'||t.type==='mountain')return false; if(t.type==='forest')return false; return true; }
 function placeBuilding(gx,gy){
   const bd=BUILDINGS[selectedBuild];
@@ -286,7 +378,7 @@ function placeBuilding(gx,gy){
   if(state.gold<bd.cost){ notify(`Brakuje grosza! (${bd.cost}🪙)`,true); return; }
   if(state.wood<bd.wood){ notify(`Brakuje drewna! (${bd.wood}🪵)`,true); return; }
   state.gold-=bd.cost; state.wood-=bd.wood; state.map[`${gx},${gy}`]={type:selectedBuild,level:1};
-  recalc(); notify(`${bd.name} wzniesiona!`); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`-${bd.cost}🪙`,'#b33a4a'); updateUI(); autoSave();
+  recalc(); notify(`${bd.name} wzniesiona!`); SFX.build(); vibrate(40); const sc=gridToScreen(gx,gy); floatText(sc.x+TILE*zoom/2,sc.y,`-${bd.cost}🪙`,'#b33a4a'); updateUI(); autoSave();
 }
 function tryBuyPlot(gx,gy){
   const px=Math.floor(gx/PLOT),py=Math.floor(gy/PLOT),key=`${px},${py}`;
@@ -295,7 +387,7 @@ function tryBuyPlot(gx,gy){
   if(!adj){ notify('Kupuj tylko ziemię obok swojej!',true); return true; }
   const cost=plotCost();
   if(state.gold<cost){ notify(`Brakuje grosza (${fmt(cost)}🪙)`,true); return true; }
-  state.gold-=cost; state.ownedPlots[key]=true; state.plotsBought++; notify('Nowa kraina odkryta! 🗺️');
+  state.gold-=cost; state.ownedPlots[key]=true; state.plotsBought++; notify('Nowa kraina odkryta! 🗺️'); SFX.land(); vibrate(60);
   const sc=gridToScreen(px*PLOT+PLOT/2,py*PLOT+PLOT/2); floatText(sc.x,sc.y,`-${fmt(cost)}🪙`,'#b33a4a'); updateUI(); autoSave(); return true;
 }
 
@@ -311,6 +403,7 @@ function tick(){
   const keys=Object.keys(state.map);
   if(keys.length){const rk=keys[Math.floor(Math.random()*keys.length)];const [gx,gy]=rk.split(',').map(Number);if(fogLevel(gx,gy)===0){const sc=gridToScreen(gx,gy);const b=state.map[rk];floatText(sc.x+TILE*zoom/2,sc.y,`+${BUILDINGS[b.type].income*b.level}🪙`);}}
   if(state.food<0&&Math.random()<0.3) notify('⚠ Głód! Zbuduj pola.',true);
+  if(Object.keys(state.map).length>0 && tickCount%3===0) SFX.coin();
   updateUI();
   if(++tickCount%4===0) saveGame(false); // autosave every 4 years
 }
@@ -358,13 +451,13 @@ function miniIcon(c,type){
 function selectBuild(type){ const bd=BUILDINGS[type]; if(state.gold<bd.unlock&&!hasUnlocked(type)){notify(`Odblokuj za ${fmt(bd.unlock)}🪙`,true);return;} selectedBuild=(selectedBuild===type)?null:type; axeMode=false; closeInfo(); updateUI(); }
 function openInfo(key){ selectedTile=key; const b=state.map[key],bd=BUILDINGS[b.type]; document.getElementById('ip-title').textContent=bd.name; const tier=Math.floor((b.level-1)/5); const tn=['','Złoty ','Mistrzowski ','Królewski ','Legendarny '][Math.min(tier,4)]; document.getElementById('ip-lvl').textContent=`${tn}Poziom ${b.level}`; document.getElementById('ip-desc').textContent=bd.desc; document.getElementById('ip-income').textContent=bd.income*b.level; document.getElementById('ip-pop-stat').innerHTML=bd.pop?`Ludność: <b>+${bd.pop*b.level}</b>`:(bd.food?`Żywność: <b>${bd.food>0?'+':''}${bd.food*b.level}</b>`:''); const up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level)); document.getElementById('ip-upgrade').innerHTML=`⬆ Rozbuduj<br><small>${fmt(up)}🪙</small>`; const ic=document.getElementById('ip-icon'); ic.innerHTML='<canvas width="40" height="40"></canvas>'; miniIcon(ic.querySelector('canvas').getContext('2d'),b.type); document.getElementById('info-panel').classList.add('show'); }
 function closeInfo(){ document.getElementById('info-panel').classList.remove('show'); selectedTile=null; }
-function doUpgrade(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];const up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level));if(state.gold<up){notify('Brakuje grosza!',true);return;}state.gold-=up;b.level++;recalc();notify(`${bd.name} → poziom ${b.level}!`);openInfo(selectedTile);updateUI();autoSave(); }
+function doUpgrade(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];const up=Math.round(bd.cost*Math.pow(UPGRADE_MULT,b.level));if(state.gold<up){notify('Brakuje grosza!',true);SFX.error();return;}state.gold-=up;b.level++;recalc();notify(`${bd.name} → poziom ${b.level}!`);SFX.upgrade();vibrate(40);openInfo(selectedTile);updateUI();autoSave(); }
 function doDemolish(){ const b=state.map[selectedTile],bd=BUILDINGS[b.type];const ref=Math.round(bd.cost*0.4*b.level);state.gold+=ref;delete state.map[selectedTile];recalc();notify(`Zburzono. Odzyskano ${fmt(ref)}🪙`);closeInfo();updateUI();autoSave(); }
 function fmt(n){ n=Math.round(n); if(n>=1e6)return(n/1e6).toFixed(1)+'mln'; if(n>=1e3)return(n/1e3).toFixed(1)+'tys'; return''+n; }
 let notifT; function notify(msg,err=false){const n=document.getElementById('notif');n.textContent=msg;n.className='show'+(err?' err':'');clearTimeout(notifT);notifT=setTimeout(()=>n.className=err?'err':'',1800);}
 function floatText(x,y,txt,color='#e6c558'){const el=document.createElement('div');el.className='float-text';el.textContent=txt;el.style.left=x+'px';el.style.top=y+'px';el.style.color=color;document.getElementById('canvas-wrap').appendChild(el);setTimeout(()=>el.remove(),1200);}
 function toggleSpeed(){state.speed=state.speed===1?2:state.speed===2?4:1;document.getElementById('speed-btn').textContent=state.speed===1?'⏩':state.speed===2?'⏩⏩':'⏩⏩⏩';clearInterval(gameLoop);gameLoop=setInterval(tick,TICK_MS/state.speed);}
-function centerView(){camX=0;camY=0;zoom=0.6;}
+function centerView(){camX=0;camY=0;zoom=clampZoom(0.6);}
 
 // =====================================================================
 //  INPUT  (FIX: canvas-relative coords + anchored zoom)
@@ -388,17 +481,18 @@ function setupInput(){
       e.preventDefault();
       const r=canvas.getBoundingClientRect();
       const t0=e.touches[0], t1=e.touches[1];
-      const mx=(t0.clientX+t1.clientX)/2 - r.left;  // midpoint in canvas coords
+      const mx=(t0.clientX+t1.clientX)/2 - r.left;
       const my=(t0.clientY+t1.clientY)/2 - r.top;
       const d=Math.hypot(t0.clientX-t1.clientX, t0.clientY-t1.clientY);
       if(pinchPrev>0){
         const oldZoom=zoom;
-        zoom=Math.max(0.3,Math.min(1.6, zoom*(d/pinchPrev)));
-        // world point under midpoint must stay fixed:
-        // worldX = (mx - camX - W/2)/(TILE*oldZoom); keep same → adjust cam
-        const k=zoom/oldZoom;
-        camX = mx - W/2 - (mx - camX - W/2)*k;
-        camY = my - H/2 - (my - camY - H/2)*k;
+        const newZoom=clampZoom(zoom*(d/pinchPrev));
+        const k=newZoom/oldZoom;        // FAKTYCZNA zmiana po clampie
+        zoom=newZoom;
+        if(k!==1){                      // przesuń kamerę tylko gdy zoom realnie się zmienił
+          camX = mx - W/2 - (mx - camX - W/2)*k;
+          camY = my - H/2 - (my - camY - H/2)*k;
+        }
       }
       pinchPrev=d;
     }
@@ -410,24 +504,149 @@ function setupInput(){
     e.preventDefault();
     const c=evToCanvas(e);
     const oldZoom=zoom;
-    zoom=Math.max(0.3,Math.min(1.6, zoom - e.deltaY*0.0015));
-    const k=zoom/oldZoom;
-    camX = c.x - W/2 - (c.x - camX - W/2)*k;
-    camY = c.y - H/2 - (c.y - camY - H/2)*k;
+    const newZoom=clampZoom(zoom - e.deltaY*0.0015);
+    const k=newZoom/oldZoom;
+    zoom=newZoom;
+    if(k!==1){
+      camX = c.x - W/2 - (c.x - camX - W/2)*k;
+      camY = c.y - H/2 - (c.y - camY - H/2)*k;
+    }
   },{passive:false});
 }
 function resize(){ dpr=window.devicePixelRatio||1; const wrap=document.getElementById('canvas-wrap'); W=wrap.clientWidth; H=wrap.clientHeight; canvas.width=W*dpr; canvas.height=H*dpr; canvas.style.width=W+'px'; canvas.style.height=H+'px'; ctx.setTransform(dpr,0,0,dpr,0,0); }
-function startGame(){ document.getElementById('intro').style.display='none'; if(started){return;} started=true; gameLoop=setInterval(tick,TICK_MS/state.speed); notify('Witaj, Książę! Karczuj las po drewno.'); saveGame(false); }
+function startGame(){ document.getElementById('intro').style.display='none'; ac(); if(settings.music && musicReady && musicTracks.length) playRandomTrack();
+  if(started){ return; } started=true; gameLoop=setInterval(tick,TICK_MS/state.speed);
+  let seen=false; try{ seen=localStorage.getItem(tutSeenKey)==='1'; }catch(e){}
+  if(!seen){ showTutorial(); } else { notify('Witaj, Książę! Karczuj las po drewno.'); }
+  saveGame(false); }
+
+// =====================================================================
+//  AUDIO — efekty (Web Audio, syntetyczne) + muzyka (1.mp3, 2.mp3...)
+// =====================================================================
+const settings = { music:false, musicVol:0.5, sfx:true, sfxVol:0.6, vibe:true };
+const SET_KEY='grod_settings_v1';
+function loadSettings(){ try{ const r=localStorage.getItem(SET_KEY); if(r)Object.assign(settings,JSON.parse(r)); }catch(e){} }
+function saveSettings(){ try{ localStorage.setItem(SET_KEY,JSON.stringify(settings)); }catch(e){} }
+
+let audioCtx=null;
+function ac(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume(); return audioCtx; }
+
+// generic tone
+function tone(freq,dur,type='sine',vol=1,slideTo=null){
+  if(!settings.sfx) return; const c=ac(); if(!c) return;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type; o.frequency.setValueAtTime(freq,c.currentTime);
+  if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo,c.currentTime+dur);
+  const v=vol*settings.sfxVol;
+  g.gain.setValueAtTime(0.0001,c.currentTime);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.001,v),c.currentTime+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
+  o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+dur+0.02);
+}
+// noise burst (chop / thud)
+function noiseBurst(dur,vol=1,filterFreq=1000){
+  if(!settings.sfx) return; const c=ac(); if(!c) return;
+  const n=Math.floor(c.sampleRate*dur); const buf=c.createBuffer(1,n,c.sampleRate); const data=buf.getChannelData(0);
+  for(let i=0;i<n;i++) data[i]=(Math.random()*2-1)*(1-i/n);
+  const src=c.createBufferSource(); src.buffer=buf;
+  const f=c.createBiquadFilter(); f.type='lowpass'; f.frequency.value=filterFreq;
+  const g=c.createGain(); g.gain.value=vol*settings.sfxVol;
+  src.connect(f); f.connect(g); g.connect(c.destination); src.start();
+}
+const SFX = {
+  build(){ tone(330,0.08,'square',0.25); setTimeout(()=>tone(523,0.12,'square',0.25),70); setTimeout(()=>tone(784,0.15,'triangle',0.2),150); }, // wesoły akord
+  chop(){ noiseBurst(0.12,0.5,800); setTimeout(()=>noiseBurst(0.08,0.3,500),60); }, // rąbanie
+  coin(){ tone(880,0.06,'square',0.15); setTimeout(()=>tone(1318,0.1,'square',0.12),50); }, // brzdęk monet
+  land(){ tone(440,0.1,'sine',0.2,660); setTimeout(()=>tone(660,0.15,'sine',0.2,880),90); }, // odkrycie ziemi
+  upgrade(){ [392,494,587,784].forEach((f,i)=>setTimeout(()=>tone(f,0.12,'triangle',0.2),i*70)); }, // fanfara
+  error(){ tone(180,0.15,'sawtooth',0.15,120); },
+  click(){ tone(600,0.04,'square',0.1); },
+};
+function vibrate(ms){ if(settings.vibe && navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
+
+// MUZYKA — losuje 1.mp3,2.mp3... aż napotka brak pliku
+let musicEl=null, musicTracks=[], musicReady=false;
+function setupMusic(){
+  musicEl=new Audio(); musicEl.volume=settings.musicVol;
+  musicEl.addEventListener('ended',playRandomTrack);
+  musicEl.addEventListener('error',()=>{});
+}
+function probeTracks(maxN=12){
+  // sprawdza które pliki istnieją (1.mp3..maxN.mp3)
+  let pending=maxN, found=[];
+  for(let i=1;i<=maxN;i++){
+    const a=new Audio(); a.src=i+'.mp3';
+    a.addEventListener('canplaythrough',()=>{ found.push(i+'.mp3'); if(--pending<=0)finish(); },{once:true});
+    a.addEventListener('error',()=>{ if(--pending<=0)finish(); },{once:true});
+    a.load();
+  }
+  function finish(){ musicTracks=found.sort((x,y)=>parseInt(x)-parseInt(y)); musicReady=true; if(settings.music&&musicTracks.length)playRandomTrack(); }
+  // bezpiecznik: po 4s i tak kończ
+  setTimeout(()=>{ if(!musicReady){ musicReady=true; if(settings.music&&musicTracks.length)playRandomTrack(); } },4000);
+}
+function playRandomTrack(){
+  if(!settings.music||!musicTracks.length||!musicEl) return;
+  const t=musicTracks[Math.floor(Math.random()*musicTracks.length)];
+  musicEl.src=t; musicEl.volume=settings.musicVol;
+  musicEl.play().catch(()=>{});
+}
+function stopMusic(){ if(musicEl){ musicEl.pause(); } }
+
+// =====================================================================
+//  USTAWIENIA — UI
+// =====================================================================
+function openSettings(){ SFX.click(); syncSettingsUI(); document.getElementById('settings').classList.add('show'); }
+function closeSettings(){ document.getElementById('settings').classList.remove('show'); }
+function syncSettingsUI(){
+  document.getElementById('set-music').checked=settings.music;
+  document.getElementById('set-music-vol').value=Math.round(settings.musicVol*100);
+  document.getElementById('set-sfx').checked=settings.sfx;
+  document.getElementById('set-sfx-vol').value=Math.round(settings.sfxVol*100);
+  document.getElementById('set-vibe').checked=settings.vibe;
+}
+function onMusicToggle(){ settings.music=document.getElementById('set-music').checked; saveSettings(); if(settings.music){ if(musicReady&&musicTracks.length)playRandomTrack(); } else stopMusic(); }
+function onMusicVol(){ settings.musicVol=document.getElementById('set-music-vol').value/100; if(musicEl)musicEl.volume=settings.musicVol; saveSettings(); }
+function onSfxToggle(){ settings.sfx=document.getElementById('set-sfx').checked; saveSettings(); if(settings.sfx)SFX.click(); }
+function onSfxVol(){ settings.sfxVol=document.getElementById('set-sfx-vol').value/100; saveSettings(); SFX.click(); }
+function onVibeToggle(){ settings.vibe=document.getElementById('set-vibe').checked; saveSettings(); if(settings.vibe)vibrate(30); }
+function resetFromSettings(){ closeSettings(); resetGame(); }
+
+// =====================================================================
+//  SAMOUCZEK
+// =====================================================================
+const TUT_STEPS=[
+  { icon:'🦅', title:'Witaj, Książę!', text:'Rządzisz małą osadą w roku 966. Twoim celem jest rozbudowa potężnego księstwa. Pokażę Ci podstawy w kilka chwil.' },
+  { icon:'🌾', title:'Buduj', text:'Wybierz budynek z dolnego paska, a potem dotknij pola na mapie. Zacznij od Pól (jedzenie) i Chat (mieszkańcy). Każdy budynek kosztuje grosz 🪙 i drewno 🪵.' },
+  { icon:'🪓', title:'Karczuj las', text:'Drewno zdobywasz wycinając lasy. Wybierz zielone narzędzie 🪓 i dotknij lasu na swojej ziemi — dostaniesz drewno i odsłonisz pole pod budowę.' },
+  { icon:'🪙', title:'Zarabiaj', text:'Budynki co rok dają grosz. Targowiska i porty zarabiają najwięcej. Uwaga na żywność 🌾 — gdy spadnie poniżej zera, lud głoduje i dochód maleje!' },
+  { icon:'🗺️', title:'Zdobywaj ziemie', text:'Złote pola obok Twoich gruntów możesz wykupić. Każda kolejna ziemia jest droższa, ale odsłania nowe krainy: puszcze, rzeki, góry i morze.' },
+  { icon:'⬆️', title:'Rozbudowuj', text:'Dotknij swojego budynku, by go ulepszyć. Wyższe poziomy = większy dochód, a gwiazdki zmieniają kolor co 5 poziomów. Powodzenia, Władco!' },
+];
+let tutStep=0, tutSeenKey='grod_tut_seen_v1';
+function showTutorial(force=false){
+  tutStep=0; renderTut(); document.getElementById('tutorial').classList.add('show');
+}
+function renderTut(){
+  const s=TUT_STEPS[tutStep];
+  document.getElementById('tut-icon').textContent=s.icon;
+  document.getElementById('tut-title').textContent=s.title;
+  document.getElementById('tut-text').textContent=s.text;
+  document.getElementById('tut-next').textContent=(tutStep===TUT_STEPS.length-1)?'Zaczynamy! ⚔':'Dalej →';
+  const dots=document.getElementById('tut-dots'); dots.innerHTML='';
+  TUT_STEPS.forEach((_,i)=>{ const d=document.createElement('span'); if(i===tutStep)d.className='on'; dots.appendChild(d); });
+}
+function nextTut(){ SFX.click(); vibrate(15); if(tutStep<TUT_STEPS.length-1){ tutStep++; renderTut(); } else endTutorial(); }
+function endTutorial(){ document.getElementById('tutorial').classList.remove('show'); try{ localStorage.setItem(tutSeenKey,'1'); }catch(e){} }
 
 function init(){
   canvas=document.getElementById('game-canvas'); ctx=canvas.getContext('2d');
   resize(); window.addEventListener('resize',resize); setupInput();
   // test storage
   try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); }catch(e){ storageOK=false; }
+  loadSettings(); setupMusic(); probeTracks();
   const loaded=loadGame();
   recalc(); updateUI(); render();
   if(loaded && started){
-    // resume directly — skip intro
     document.getElementById('intro').style.display='none';
     gameLoop=setInterval(tick,TICK_MS/state.speed);
     notify('Wczytano zapis! 📜');
@@ -439,8 +658,8 @@ function init(){
   if(!storageOK){
     document.getElementById('intro-sub').innerHTML+='<br><br><span style="color:#c08050;font-size:12px">⚠ W tym podglądzie zapis nie działa. Pobierz plik HTML i otwórz w przeglądarce telefonu — wtedy zapis zadziała.</span>';
   }
-  // save on background/exit
-  window.addEventListener('visibilitychange',()=>{ if(document.hidden) saveGame(false); });
+  // save + pauza muzyki w tle
+  window.addEventListener('visibilitychange',()=>{ if(document.hidden){ saveGame(false); stopMusic(); } else if(settings.music&&started&&musicTracks.length){ musicEl.play().catch(()=>{}); } });
   window.addEventListener('pagehide',()=>saveGame(false));
   window.addEventListener('beforeunload',()=>saveGame(false));
 }
